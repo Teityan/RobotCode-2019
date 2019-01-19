@@ -7,10 +7,19 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PWMSpeedController;
+import edu.wpi.first.wpilibj.Solenoid;
+
 /**
  * Add your docs here.
  */
 public class Grabber {
+
+    private PWMSpeedController rollerMotor;
+    private Solenoid barSolenoid;
+    private Solenoid armSolenoid;
+
+    private boolean is_RollerMoving;
 
     /*
     Grabber(Motor motor, Encoder encoder, Solenoid solenoid)

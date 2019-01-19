@@ -103,7 +103,7 @@ public class Drive extends DifferentialDrive{
 		return driveStraightController.isEnabled() && driveRotateController.isEnabled();
 	}
 
-	class DrivePIDOutput implements PIDOutput {
+	private class DrivePIDOutput implements PIDOutput {
 
 		PIDMode m_pid = PIDMode.Default;
 
@@ -143,3 +143,15 @@ public class Drive extends DifferentialDrive{
 
 
 }
+
+/*
+追加で
+setStraightP,I,D(double p,i,d);
+setTurnP,I,D(double p,i,d);
+    ゲインの調整をしやすくするため
+
+isMoving();
+    進んだり回ったりしているか
+
+
+*/
