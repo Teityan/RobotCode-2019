@@ -27,11 +27,7 @@ public class Grabber {
         棒を広げてHATCH PANEL回収する
     releasePanl();
         棒を狭めてロボットが後退すればHATCH PANELを置けるようにする
-    WhetherBarHolds();
-        棒が広がっているか
-    WhetherBarReleases();
-        棒が狭まっているか
-
+    
 
     holdArm();
         モーターや棒、板をしまう
