@@ -13,20 +13,30 @@ package frc.robot;
 public class Grabber {
 
     /*
+    Grabber(Motor motor, Encoder encoder, Solenoid solenoid)
+        モーターとエンコーダー、ソレノイドを受け取る
+
     holdCargo():
-    モーターを回してCARGOを回収する
+        モーターを回してCARGOを回収する
     releaseCargo();
-    モーターを回してCARGOを射出する
+        モーターを回してCARGOを射出する
+    isRollerMoving()
+        モーターが動いているか
 
     holdPanel();
-    棒を広げてHATCH PANEL回収する
+        棒を広げてHATCH PANEL回収する
     releasePanl();
-    棒を狭めてロボットが下がればHATCH PANELを置けるようにする
+        棒を狭めてロボットが後退すればHATCH PANELを置けるようにする
+    WhetherBarHolds();
+        棒が広がっているか
+    WhetherBarReleases();
+        棒が狭まっているか
+
 
     holdArm();
-    モーターや棒、板をしまう
+        モーターや棒、板をしまう
     releaseArm();
-    モーターや棒、板を出す
+        モーターや棒、板を出す
     */
-    
+
 }
