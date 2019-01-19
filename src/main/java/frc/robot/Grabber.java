@@ -11,4 +11,12 @@ package frc.robot;
  * Add your docs here.
  */
 public class Grabber {
+
+
+    /*
+    CARGOの回収
+    CARGOの放出
+
+    HATCH PANEL
+    */
 }
