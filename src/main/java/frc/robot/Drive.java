@@ -10,7 +10,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
-
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
@@ -65,7 +64,22 @@ public class Drive extends DifferentialDrive{
 		driveStraightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
 		driveRotateController.setSetpoint(g_drive.getAngle() + turnSetpoint);
 
-	}
+    }
+    
+    public void setStraightSetpoint(double straightSetpoint){
+        driveStraightController.setSetpoint(straightSetpoint);
+		driveRotateController.setSetpoint(0);
+    }
+
+    public void setTurnSetpoint(double turnSetpoint){
+        driveStraightController.setSetpoint(0);
+		driveRotateController.setSetpoint(turnSetpoint);
+    }
+
+    public void setSetpoint(double straightSetpoint, double turnSetpoint){
+        driveStraightController.setSetpoint(straightSetpoint);
+		driveRotateController.setSetpoint(turnSetpoint);
+    }
 
 	public void PIDenable() {
 		if (!driveStraightController.isEnabled()) {

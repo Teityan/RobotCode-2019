@@ -12,11 +12,21 @@ package frc.robot;
  */
 public class Grabber {
 
-
     /*
-    CARGOの回収
-    CARGOの放出
+    holdCargo():
+    モーターを回してCARGOを回収する
+    releaseCargo();
+    モーターを回してCARGOを射出する
 
-    HATCH PANEL
+    holdPanel();
+    棒を広げてHATCH PANEL回収する
+    releasePanl();
+    棒を狭めてロボットが下がればHATCH PANELを置けるようにする
+
+    holdArm();
+    モーターや棒、板をしまう
+    releaseArm();
+    モーターや棒、板を出す
     */
+    
 }
