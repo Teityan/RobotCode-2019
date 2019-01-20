@@ -2,14 +2,18 @@
 /* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
+/* the project.          
+                                                     */
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
 
-/**
- * Add your docs here.
- */
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PWMSpeedController;
+import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.SpeedController;
+
 public class Lift {
     /*
     <モーター>
@@ -40,4 +44,39 @@ public class Lift {
             ロケットのボール入れる位置
                 1~2段目
     */
+    Encoder encoder;
+    PWMSpeedController P_SpeedController;
+    PIDController controller;
+    //コンストラクター
+    Lift(PWMSpeedController P_SpeedController, Encoder encoder, PIDController controller){
+        this.encoder = encoder;
+        this.P_SpeedController = P_SpeedController;
+        this.controller = controller;
+    }
+
+    //モーター
+    public void setSpeed(double speed){
+        P_SpeedController.set(speed);
+    }
+    //エンコーダー
+    public double getHeight(){
+        double height = encoder.getDistance();
+        return height;
+}
+    public double getSpeed(){
+        double speed = encoder.getRate();
+        return speed;
+    }
+
+    //PID
+    public void enablePID(){
+        controller.enable();
+    }
+    public void disablePID(){
+        controller.disable();
+    }
+    public void setSetpoint(double height){
+        controller.setSetpoint(height);
+    }
+
 }
