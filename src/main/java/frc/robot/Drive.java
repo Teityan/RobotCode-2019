@@ -25,7 +25,7 @@ public class Drive extends DifferentialDrive{
 	private EncoderGroup e_drive;
 	private ADXRS450_Gyro g_drive;
 
-	private PIDController driveStraightController, driveRotateController;
+	private PIDController straightController, turnController;
 
 	
 
@@ -35,9 +35,9 @@ public class Drive extends DifferentialDrive{
 		this.e_drive = e_drive;
 		this.g_drive = g_drive;
 
-		driveStraightController = new PIDController(Const.kp_straight, Const.ki_straight, Const.kd_straight, e_drive,
+		straightController = new PIDController(Const.kp_straight, Const.ki_straight, Const.kd_straight, e_drive,
 				new DrivePIDOutput(PIDMode.Straight));
-		driveRotateController = new PIDController(Const.kp_rotate, Const.ki_rotate, Const.kd_rotate, g_drive,
+		turnController = new PIDController(Const.kp_rotate, Const.ki_rotate, Const.kd_rotate, g_drive,
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
@@ -49,58 +49,60 @@ public class Drive extends DifferentialDrive{
 	 * しかし、少し扱いづらいので"Relative"(=相対)にして見えないところで処理する。
 	 */
 	public void setRelativeStraightSetpoint(double setpoint) {
-		driveStraightController.setSetpoint(e_drive.getDistance() + setpoint);
-		driveRotateController.setSetpoint(g_drive.getAngle());
+		straightController.setSetpoint(e_drive.getDistance() + setpoint);
+		turnController.setSetpoint(g_drive.getAngle());
 
 	}
 
 	public void setRelativeTurnSetpoint(double setpoint) {
-		driveStraightController.setSetpoint(e_drive.getDistance());
-		driveRotateController.setSetpoint(g_drive.getAngle() + setpoint);
+		straightController.setSetpoint(e_drive.getDistance());
+		turnController.setSetpoint(g_drive.getAngle() + setpoint);
 
 	}
 
 	public void setRelativeSetpoint(double straightSetpoint, double turnSetpoint) {
-		driveStraightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
-		driveRotateController.setSetpoint(g_drive.getAngle() + turnSetpoint);
+		straightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
+		turnController.setSetpoint(g_drive.getAngle() + turnSetpoint);
 
     }
     
     public void setStraightSetpoint(double straightSetpoint){
-        driveStraightController.setSetpoint(straightSetpoint);
-		driveRotateController.setSetpoint(0);
+        straightController.setSetpoint(straightSetpoint);
+		turnController.setSetpoint(0);
     }
 
     public void setTurnSetpoint(double turnSetpoint){
-        driveStraightController.setSetpoint(0);
-		driveRotateController.setSetpoint(turnSetpoint);
+        straightController.setSetpoint(0);
+		turnController.setSetpoint(turnSetpoint);
     }
 
     public void setSetpoint(double straightSetpoint, double turnSetpoint){
-        driveStraightController.setSetpoint(straightSetpoint);
-		driveRotateController.setSetpoint(turnSetpoint);
+        straightController.setSetpoint(straightSetpoint);
+		turnController.setSetpoint(turnSetpoint);
     }
 
+
+
 	public void PIDenable() {
-		if (!driveStraightController.isEnabled()) {
-			driveStraightController.enable();
+		if (!straightController.isEnabled()) {
+			straightController.enable();
 		}
-		if (!driveRotateController.isEnabled()) {
-			driveRotateController.enable();
+		if (!turnController.isEnabled()) {
+			turnController.enable();
 		}
 	}
 
 	public void PIDdisable() {
-		if (driveStraightController.isEnabled()) {
-			driveStraightController.disable();
+		if (straightController.isEnabled()) {
+			straightController.disable();
 		}
-		if (driveRotateController.isEnabled()) {
-			driveRotateController.disable();
+		if (turnController.isEnabled()) {
+			turnController.disable();
 		}
 	}
 
 	public boolean is_PIDEnabled() {
-		return driveStraightController.isEnabled() && driveRotateController.isEnabled();
+		return straightController.isEnabled() && turnController.isEnabled();
 	}
 
 	private class DrivePIDOutput implements PIDOutput {
