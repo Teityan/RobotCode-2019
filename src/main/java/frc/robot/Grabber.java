@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Solenoid;
 
@@ -19,16 +20,60 @@ public class Grabber {
     private Solenoid barSolenoid;
     private Solenoid armSolenoid;
 
-    private boolean is_RollerMoving;
+    private boolean is_RollerMoving = false;
+
+
+    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid, Encoder liftEncoder){
+        this.rollerMotor = rollerMotor;
+        this.barSolenoid = barSolenoid;
+        this.armSolenoid = armSolenoid;
+    }
+
+    public void holdCargo(){
+        rollerMotor.set(1.0);//設置によっては±変わる
+        is_RollerMoving = true;
+    }
+
+    public void releaseCargo(){
+        rollerMotor.set(-1.0);//設置によっては変わる
+        is_RollerMoving = true;
+    }
+
+    public void stopRoller(){
+        rollerMotor.stopMotor();
+        is_RollerMoving = false;
+    }
+
+    public boolean isRollerMoving(){
+        return is_RollerMoving;
+    }
+
+    public void holdPanel(){
+        barSolenoid.set(true);//ソレノイドのつけ方によりT/Fは変わる
+    }
+
+    public void releasePanel(){
+        barSolenoid.set(false);//ソレノイドのつけ方によりT/Fは変わる
+    }
+
+    public void holdArm(){
+        armSolenoid.set(true);//ソレノイドのつけ方によりT/Fは変わる
+    }
+
+    public void releaseArm(){
+        armSolenoid.set(false);//ソレノイドのつけ方によりT/Fは変わる
+    }
 
     /*
-    Grabber(Motor motor, Encoder encoder, Solenoid solenoid)
-        モーターとエンコーダー、ソレノイドを受け取る
+    Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid, Encoder encoder)
+        モーターとソレノイドを受け取る
 
     holdCargo():
         モーターを回してCARGOを回収する
     releaseCargo();
         モーターを回してCARGOを射出する
+    stopRoller();
+        モーターを止める
     isRollerMoving()
         モーターが動いているか
 

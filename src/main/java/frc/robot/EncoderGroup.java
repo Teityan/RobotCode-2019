@@ -41,19 +41,15 @@ public class EncoderGroup implements PIDSource{
     
         @Override
     public void setPIDSourceType(PIDSourceType pidSource) {
-        // TODO 自動生成されたメソ�?ド�?�スタ�?
-
     }
     
         @Override
-    public PIDSourceType getPIDSourceType() {
-        // TODO 自動生成されたメソ�?ド�?�スタ�?
+    public PIDSourceType getPIDSourceType() { 
         return PIDSourceType.kRate;
     }
     
         @Override
     public double pidGet() {
-        // TODO 自動生成されたメソ�?ド�?�スタ�?
         return getDistance();
     }
     
