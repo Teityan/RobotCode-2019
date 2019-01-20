@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Solenoid;
 
@@ -23,7 +22,7 @@ public class Grabber {
     private boolean is_RollerMoving = false;
 
 
-    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid, Encoder liftEncoder){
+    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid){
         this.rollerMotor = rollerMotor;
         this.barSolenoid = barSolenoid;
         this.armSolenoid = armSolenoid;
@@ -65,7 +64,7 @@ public class Grabber {
     }
 
     /*
-    Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid, Encoder encoder)
+    Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid)
         モーターとソレノイドを受け取る
 
     holdCargo():
