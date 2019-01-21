@@ -26,11 +26,10 @@ public class Drive extends DifferentialDrive{
 	private ADXRS450_Gyro g_drive;
 
 	private PIDController straightController, turnController;
-
 	
-
-	public Drive(SpeedController leftMotor, SpeedController rightMotor, EncoderGroup e_drive,
-			ADXRS450_Gyro g_drive) {
+	
+ 
+	public Drive(SpeedController leftMotor, SpeedController rightMotor, EncoderGroup e_drive, ADXRS450_Gyro g_drive) {
 		super(leftMotor, rightMotor);
 		this.e_drive = e_drive;
 		this.g_drive = g_drive;
@@ -41,22 +40,15 @@ public class Drive extends DifferentialDrive{
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
-	/* 本来のsetSetPointでは現在位置からではなくEncoder系を作動させた時の初期位置からの距離、角度を指定する必要がある。
-	 * PIDControllerのcalculate()をみるとinputにpidGet()をいれ、setSetpoint()でsetされた目標値との偏差をとっている。
-	 * つまり、何も考えずに入れるとEncoder系を作動させた時の初期位置からのsetpointになり、思うように動作しない。
-	 * 例えば、1ｍ前進した後に2ｍ後進しようとしてsetSetpoint(-2000)などとすると実際には3ｍ後進してしまう。
-	 * だから、setSetpoint(getDistance()(=1000) + setpoint(=-2000))とする。
-	 * しかし、少し扱いづらいので"Relative"(=相対)にして見えないところで処理する。
-	 */
+	
+
 	public void setRelativeStraightSetpoint(double setpoint) {
-		straightController.setSetpoint(e_drive.getDistance() + setpoint);
-		turnController.setSetpoint(g_drive.getAngle());
+		setRelativeSetpoint(e_drive.getDistance() + setpoint, g_drive.getAngle());
 
 	}
 
 	public void setRelativeTurnSetpoint(double setpoint) {
-		straightController.setSetpoint(e_drive.getDistance());
-		turnController.setSetpoint(g_drive.getAngle() + setpoint);
+		setRelativeSetpoint(e_drive.getDistance(), g_drive.getAngle() + setpoint);
 
 	}
 
@@ -67,13 +59,11 @@ public class Drive extends DifferentialDrive{
     }
     
     public void setStraightSetpoint(double straightSetpoint){
-        straightController.setSetpoint(straightSetpoint);
-		turnController.setSetpoint(0);
+        setSetpoint(straightSetpoint, 0);
     }
 
     public void setTurnSetpoint(double turnSetpoint){
-        straightController.setSetpoint(0);
-		turnController.setSetpoint(turnSetpoint);
+        setSetpoint(0, turnSetpoint);
     }
 
     public void setSetpoint(double straightSetpoint, double turnSetpoint){
@@ -82,8 +72,7 @@ public class Drive extends DifferentialDrive{
     }
 
 
-
-	public void PIDenable() {
+	public void PIDEnable() {
 		if (!straightController.isEnabled()) {
 			straightController.enable();
 		}
@@ -92,7 +81,7 @@ public class Drive extends DifferentialDrive{
 		}
 	}
 
-	public void PIDdisable() {
+	public void PIDDisable() {
 		if (straightController.isEnabled()) {
 			straightController.disable();
 		}
@@ -105,7 +94,7 @@ public class Drive extends DifferentialDrive{
 		return straightController.isEnabled() && turnController.isEnabled();
 	}
 
-	private class DrivePIDOutput implements PIDOutput {
+	public class DrivePIDOutput implements PIDOutput {
 
 		PIDMode m_pid = PIDMode.Default;
 
@@ -130,7 +119,7 @@ public class Drive extends DifferentialDrive{
 			straightOutput = LimitAcceleraton(preStraightOutput, straightOutput);
 			rotateOutput = LimitAcceleraton(preRotateOutput, rotateOutput);
 
-			arcadeDrive(straightOutput, rotateOutput);
+			arcadeDrive(-straightOutput, rotateOutput);
 
 			preStraightOutput = straightOutput;
 			preRotateOutput = rotateOutput;
@@ -139,12 +128,47 @@ public class Drive extends DifferentialDrive{
 		private double LimitAcceleraton(double preOutput, double output ){
 			if(preOutput == output) return output;
 			double accelration = (output - preOutput) / Const.PIDPeriod;
-			return preOutput + Math.max(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+			double Output = preOutput + Math.max(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+			
+			return Math.min(-1.0, Math.max(Output, 1.0));
 		}
 	}
 
 
 }
+
+/*　関数一覧
+Drive(SpeedController leftMotor, SpeedController rightMotor, EncoderGroup e_drive, ADXRS450_Gyro g_drive)
+	DifferentialDrive要素のSpeedController、PIDSource用のEnocoderGroupとADXRS450_Gyroを受け取り、PIDControllerのインスタンスを作る
+
+setRelativeStraightSetpoint(double setpoint)
+setRelativeTurnSetpoint(double setpoint)
+setRelativeSetpoint(double straightSetpoint, double turnSetpoint)
+	Setpointを相対位置で代入する
+	 * 本来のsetSetPointでは現在位置からではなくEncoder系を作動させた時の初期位置からの距離、角度を指定する必要がある。
+	 * PIDControllerのcalculate()をみるとinputにpidGet()をいれ、setSetpoint()でsetされた目標値との偏差をとっている。
+	 * つまり、何も考えずに入れるとEncoder系を作動させた時の初期位置からのsetpointになり、思うように動作しない。
+	 * 例えば、1ｍ前進した後に2ｍ後進しようとしてsetSetpoint(-2000)などとすると実際には3ｍ後進してしまう。
+	 * だから、setSetpoint(getDistance()(=1000) + setpoint(=-2000))とする。
+	 * しかし、少し扱いづらいので"Relative"(=相対)にして見えないところで処理する。
+	 
+setStraightSetpoint(double straightSetpoint)
+setTurnSetpoint(double turnSetpoint)
+setSetpoint(double straightSetpoint, double turnSetpoint)
+	Setpointを絶対座標で代入する
+
+PIDEnable()
+	二つのPIDControllerをenableにする
+PIDDisable()
+	二つのPIDControllerをdisableにする
+is_PIDEnabled()
+	二つのPIDControllerがenableかどうか
+
+*/
+/*メンバークラス---DrivePIDOutput
+  その関数 
+*/
+
 
 /*
 追加で
@@ -153,7 +177,10 @@ setTurnP,I,D(double p,i,d);
     ゲインの調整をしやすくするため
 
 isMoving();
-    進んだり回ったりしているか
+	進んだり回ったりしているか
+	Encoderのしきい値
 
+PIDReset();
+	PIDのリセット
 
 */
