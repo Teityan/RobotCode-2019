@@ -45,6 +45,25 @@ public class Lift {
     Encoder encoder;
     PWMSpeedController P_SpeedController;
     PIDController controller;
+
+    public static enum Point {
+        shipHatch(1.5), 
+        shipCargo(1.4), 
+        rocketHatch_1(1.3), 
+        rocketHatch_2(1.2),
+        rocketCargo_1(1.1),
+        rocketCargo_2(1.0);
+
+    private final double point;
+
+    private Point(final double point) {
+        this.point = point;
+    }
+    public double getHeight() {
+        return this.point;
+    }
+    }
+
     //コンストラクター
     Lift(PWMSpeedController P_SpeedController, Encoder encoder, PIDController controller){
         this.encoder = encoder;
@@ -70,40 +89,36 @@ public class Lift {
     public void enablePID(){
         controller.enable();
     }
+
     public void disablePID(){
         controller.disable();
     }
+
     public void setSetpoint(double height){
         controller.setSetpoint(height);
     }
-    public void setSetopoint(point point){
-        if(controller.isEnabled()) disablePID();
-        enablePID();
+
+    public void setSetopoint(Point point){
         switch(point){
-            case cagoHach:
-            controller.setSetpoint(1.5);
+            case shipHatch:
+            controller.setSetpoint(Point.shipHatch.getHeight());
             break;
-            case cagoBall:
-            controller.setSetpoint(1.4);
+            case shipCargo:
+            controller.setSetpoint(Point.shipCargo.getHeight());
             break;
-            case rocketHach_1:
-            controller.setSetpoint(1.3);
+            case rocketHatch_1:
+            controller.setSetpoint(Point.rocketHatch_1.getHeight());
             break;
-            case rocketHach_2:
-            controller.setSetpoint(1.2);
+            case rocketHatch_2:
+            controller.setSetpoint(Point.rocketHatch_2.getHeight());
             break;
-            case rocketBall_1:
-            controller.setSetpoint(1.1);
+            case rocketCargo_1:
+            controller.setSetpoint(Point.rocketCargo_1.getHeight());
+            case rocketCargo_2:
+            controller.setSetpoint(Point.rocketCargo_2.getHeight());
             break;
             default:
+    }        
     }
-    }
-    protected enum point{
-        cagoHach,
-        cagoBall,
-        rocketHach_1,
-        rocketHach_2,
-        rocketBall_1,
-        rocketBall_2
-    }
+
 }
