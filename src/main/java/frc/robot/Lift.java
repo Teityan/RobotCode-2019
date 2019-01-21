@@ -11,9 +11,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PWMSpeedController;
-import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.SpeedController;
-
+import edu.wpi.first.wpilibj.SendableBase;
 public class Lift {
     /*
     <モーター>
@@ -78,5 +76,34 @@ public class Lift {
     public void setSetpoint(double height){
         controller.setSetpoint(height);
     }
-
+    public void setSetopoint(point point){
+        if(controller.isEnabled()) disablePID();
+        enablePID();
+        switch(point){
+            case cagoHach:
+            controller.setSetpoint(1.5);
+            break;
+            case cagoBall:
+            controller.setSetpoint(1.4);
+            break;
+            case rocketHach_1:
+            controller.setSetpoint(1.3);
+            break;
+            case rocketHach_2:
+            controller.setSetpoint(1.2);
+            break;
+            case rocketBall_1:
+            controller.setSetpoint(1.1);
+            break;
+            default:
+    }
+    }
+    protected enum point{
+        cagoHach,
+        cagoBall,
+        rocketHach_1,
+        rocketHach_2,
+        rocketBall_1,
+        rocketBall_2
+    }
 }
