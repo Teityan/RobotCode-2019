@@ -128,9 +128,9 @@ public class Drive extends DifferentialDrive{
 		private double LimitAcceleraton(double preOutput, double output ){
 			if(preOutput == output) return output;
 			double accelration = (output - preOutput) / Const.PIDPeriod;
-			double Output = preOutput + Math.max(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+			double Output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
 			
-			return Math.min(-1.0, Math.max(Output, 1.0));
+			return Math.min(1.0, Math.max(Output, -1.0));
 		}
 	}
 
