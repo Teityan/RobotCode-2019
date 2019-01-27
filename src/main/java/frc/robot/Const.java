@@ -46,22 +46,55 @@ public class Const{
 	public static final double shipCargoHeight;
 	public static final double rocketCargo_1Height;
 	public static final double rocketCargo_2Height;
-	public static final double hatch_1Height;
-	public static final double hatch_2Height;
+	public static final double panel_1Height;
+	public static final double panel_2Height;
+
+	public static final double hab_2Height;
+	public static final double hab_3Height:
 	//enumとどっち？
 
 	public static enum armHeight{
 		shipCargoHeight(),
 		rocketCargo_1Height(),
 		rocketCargo_2Height(),
-		hatch_1Height(),
-		hatch_2Height();		
+		panel_1Height(),
+		panel_2Height();		
 
 		public double height;
 		private armHeight(double height){
 			this.height = height;
 		}
 	}
+
+	public enum Command{
+	//Drive
+	  closeToLine,
+	  lineTrace,
+	
+	//Lift
+	  moveToShipCargoHeight,
+	  moveToRocketCargo_1Height,
+	  moveToRocketCargo_2Height,
+	  moveToPanel_1Height,
+	  moveToPanel_2Height,
+
+	  keepLift,
+
+	//Arm
+	  holdCargo,
+	  releaseCargo,
+	  changeBarState,
+	
+	//Climb
+	  cliimbMoveToHab_2Height,
+	  climbMoveToHab_3Height,
+	  climbStopperOn,
+	  climbLiftDown,
+	  climbAdvance,
+	
+	  noCommand;
+	}
+
 	//deadband
 	public static final double deadband = 0.1;
 

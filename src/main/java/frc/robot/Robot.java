@@ -23,10 +23,11 @@ public class Robot extends TimedRobot {
 //Controller
   private Joystick joystick;
 
-//Motor
+//Motors
   private  driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
   private  liftMotor;
   private  rollerMotor;
+  private  climbMotor;
 
 //SpeedControllerGroup
   private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
@@ -69,38 +70,31 @@ public class Robot extends TimedRobot {
   //Lift
     private double liftValue;
 
-
   //Grabber
     private boolean whetherHoldCargo;
     private boolean whetherReleaseCargo;
     private boolean whetherHoldPanel;
     private boolean lastWhetherHoldPanel = false;
   
-  //Command
+  //Commands
     private boolean is_commandInput;
-    private enum Command{
-      movetoShipCargoHeight,
-      movetoRocketCargo_1Height,
-      movetoRocketCargo_2Height,
-      movetoPanel_1Height,
-      movetoPanel_2Height,
-      lineTrace,
-      noCommand;
-    }
-    private Command command = Command.noCommand;
+    private Const.Command command = Const.Command.noCommand;
 
 //functions
   private double deadbandProcessing(double value){
     return value * Math.abs(value) > Const.deadband ? 1 : 0 ;
   }
 
-  @Override
-  public void robotInit() {
+  private Const.Command getCommand(){
+    
+  }
+@Override
+public void robotInit() {
     //Controller
     joystick = new Joystick(Const.joystickPort);
 
 
-    //Motor
+    //Motors
     driveRightFront  = new (Const.driveRightFrontPort);
     driveRightBack = new (Const.driveRightBackPort);
     driveLeftFront = new (Const.driveLeftFrontPort);
@@ -109,6 +103,8 @@ public class Robot extends TimedRobot {
     liftMotor = new (Const.liftMotorPort);
 
     rollerMotor = new (Const.rollerMotorPort);
+
+    climbMotor = new (Const.climbMotorPort);
 
     //SpeedControllerGroup
     rightDriveGroup = new SpeedControllerGroup(Const.driveRightFront, Const.driveRightBack);
@@ -152,78 +148,186 @@ public class Robot extends TimedRobot {
     
   }
   
-  @Override
-  public void autonomousInit() {
-   
-  }
+@Override
+public void autonomousInit() {
+   armSolenoid.set(true);//しまってあるアームを展開する
+}
 
   
-  @Override
-  public void autonomousPeriodic() {
+@Override
+public void autonomousPeriodic() {
     
-  }
+}
 
-  @Override
-  public void teleopInit() {
-    drive.PIDReset();
-    lift.PIDReset();
-  }
+@Override
+public void teleopInit() {
+  drive.PIDReset();
+  lift.PIDReset();
+}
   
-  @Override
-  public void teleopPeriodic() {
+@Override
+public void teleopPeriodic() {
+  /*Init
+   * これからコマンドやコントローラーで変数の値を変えてから代入する。
+   * 操作しないときは出力を出したくないため、最初に出力を出さない状態で初期化する。
+   */
 
-    //Command
-    {
-      is_commandInput = true;
+  /*Command
+   * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
+   */
 
-      command = dertermineCommand();
+    is_commandInput = true;//入力がなかったらfalseにする。
+    command = getCommand();//コマンドを判別
 
-      switch(command){
+    switch(command){
+    //Drive
+      case closeToLine:
 
+      case lineTrace:
 
-        case noCommand:
-          is_commandInput = false;
-        default:
-      }     
+    /*Lift
+     *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
+     *  モーターの値を制御するならliftValueに代入
+     */
+      case moveToShipCargoHeight:
+        liftSetpoint = Const.shipCargoHeight;
+        is_liftPIDOn = true;
+        break;
 
+      case moveToRocketCargo_1Height:
+        liftSetpoint = Const.rocketCargo_1Height;
+        is_liftPIDOn = true;
+        break;
 
-    }
+      case moveToRocketCargo_2Height:
+        liftSetpoint = Const.rocketCargo_2Height;
+        is_liftPIDOn = true;
+        break;
 
-    if(!is_commandInput){
-    //input
-      driveXValue = deadbandProcessing(joystick.getX());
-      driveYValue = deadbandProcessing(joystick.getY());
+      case moveToPanel_1Height:
+        liftSetpoint = Const.panel_1Height;
+        is_liftPIDOn = true;
+        break;
 
-      liftValue = deadbandProcessing(joystick.getThrottle());
+      case moveToPanel_2Height:
+        liftSetpoint = Const.panel_2Height;
+        is_liftPIDOn = true;
+        break;
 
-      whetherHoldCargo = joystick.getRawButton();
+      case keepLift:
+        liftValue = Const.keepLiftSpeed;
+        break;
 
-      if(joystick.getRawButton()){
+    //Arm
+     
+      case holdCargo:
+        whetherHoldCargo = true;
+        break;
+
+      case releaseCargo:
+        whetherReleaseCargo = true;
+        break;
+
+      case changeBarState:
         whetherHoldPanel = !whetherHoldPanel;//ボタンを押したら状態が変わる
-      }
+        break;
+
+    /*Climb
+     * Climbの流れ
+     * 　1.リフトを上げる。
+     * 　2.ソレノイドでストッパーを出す。
+     *   3.リフトを下げる。(ここで車体が持ち上がる)
+     *   4.モーターを回して前に進む
+     */
+      //1
+      case cliimbMoveToHab_2Height:
+        liftSetpoint = Const.hab_2Height;
+        is_liftPIDOn = true;
+        break;
+
+      case climbMoveToHab_3Height:
+        liftSetpoint = Const.hab_3Height;
+        is_liftPIDOn = true;
+        break;
+
+      //2
+      case climbStopperOn:
+        is_climbSolenoidOn = true;
+        break;
+
+      //3
+      case climbLiftDown:
+        liftValue = -1.0;
+        break;
+
+      //4
+      case climbAdvance:
+        driveXValue = ;
+        climbMotorValue = 1.0;
+        break;
+
+
+
+
+      case noCommand:
+      default:
+      is_commandInput = false;
+    }     
+  
+
+  if(!is_commandInput){
+  /*Controller
+   * コマンドがなかった時にコントローラーから値を受け取り代入する。
+   */
+    driveXValue = deadbandProcessing(joystick.getX());
+    driveYValue = deadbandProcessing(joystick.getY());
+
+    liftValue = deadbandProcessing(joystick.getThrottle());
     
-    //Substitute
-      drive.arcadeDrive(driveXValue, driveYValue);
+  }
 
-      lift.setSpeed(liftValue);
-      
-      if(whetherHoldCargo){
-        grabber.holdCargo();
-      }else{
-        grabber.stopRoller();
-      }
 
-      if(whetherReleaseCargo){
-        grabber.releaseCargo();
-      }else{
-        grabber.stopRoller();
-      }
-      
-      if(whetherHoldPanel){
-        grabber.holdPanel();
-      }else{
-        grabber.releasePanel();
-      }
+  /*Substitute
+   *  コマンドやコントローラーによって変えられた変数を代入する。
+   */
+    if(is_drivePIDOn){
+      drive.setSetpoint(driveStraightSetpoint, driveTurnSetpoint);//PID制御
+      drive.PIDEnable();
+    }else{
+      drive.PIDDisable();
+      drive.arcadeDrive(driveXValue, driveYValue);//普通のモーター制御
     }
+
+
+    if(is_liftPIDOn){
+      lift.setSetpoint(liftSetpoint);//PID制御
+      lift.PIDEnable();
+    }else{
+      lift.PIDDisable();
+      lift.setSpeed(liftValue);//普通のモーター制御
+    }
+
+      
+    if(whetherHoldCargo){
+      grabber.holdCargo();//カーゴを回収
+    }else{
+      grabber.stopRoller();//ローラーを止める
+    }
+
+    if(whetherReleaseCargo){
+      grabber.releaseCargo();//カーゴ射出
+    }else{
+      grabber.stopRoller();//ローラーを止める
+    }
+      
+    if(whetherHoldPanel){
+      grabber.holdPanel();//パネルをつかむ
+    }else{
+      grabber.releasePanel();//パネルを離す
+    }
+  
+    frontClimbSolenoid.set(is_climbSolenoidOn);//前のベアリング付き爪を出す
+    backClimbSolenoid.set(is_climbSolenoidOn);//後ろのモーター付き爪を出す
+    climbMotor.set(climbMotorValue);//後ろのモーターを動かす。
   }
 }
