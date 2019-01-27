@@ -44,18 +44,15 @@ public class Drive extends DifferentialDrive{
 
 	public void setRelativeStraightSetpoint(double setpoint) {
 		setRelativeSetpoint(e_drive.getDistance() + setpoint, g_drive.getAngle());
-
 	}
 
 	public void setRelativeTurnSetpoint(double setpoint) {
 		setRelativeSetpoint(e_drive.getDistance(), g_drive.getAngle() + setpoint);
-
 	}
 
 	public void setRelativeSetpoint(double straightSetpoint, double turnSetpoint) {
 		straightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
 		turnController.setSetpoint(g_drive.getAngle() + turnSetpoint);
-
     }
     
     public void setStraightSetpoint(double straightSetpoint){
@@ -165,8 +162,13 @@ is_PIDEnabled()
 	二つのPIDControllerがenableかどうか
 
 */
-/*メンバークラス---DrivePIDOutput
+/*メンバークラス---DrivePIDOutput　PIDOutput継承
   その関数 
+	DrivePIDOutput(PIDMode pidmode);
+		PIDModeによって後述のpidWrite()の動作が変わる。
+
+	pidWrite(double output);
+		outputを受け取り処理して代入する。PIDModeによって代入対象が異なる。
 */
 
 
@@ -178,7 +180,7 @@ setTurnP,I,D(double p,i,d);
 
 isMoving();
 	進んだり回ったりしているか
-	Encoderのしきい値
+	Encoderのしきい値よく考える。
 
 PIDReset();
 	PIDのリセット
