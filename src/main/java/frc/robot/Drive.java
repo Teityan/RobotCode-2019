@@ -186,3 +186,15 @@ PIDReset();
 	PIDのリセット
 
 */
+
+/*
+	setLineTraceSetpoint(double setpoint);
+		引数はなくてもいいかもしれない。
+	lineTracePIDEnalble();
+		ライントレースする。普通のPID制御をDisableにする。(PIDEnableも修正)
+	
+*/
+
+/*修正
+	lineTraceによるPIDEnable修正, コンストラクタの引数の追加、PIDControllerのインスタンス生成, PIDOutputのEnum及びswitch文内に追加, 
+*/

@@ -13,6 +13,7 @@ public class Const{
 	
 	//LiftMotors
 	public static final int liftMotorPort;
+	public static final double keepLiftHeightSpeed;
 
 	//ArmSolenoids & Motors
 	public static final int armSolenoidPort;
@@ -50,7 +51,7 @@ public class Const{
 	public static final double panel_2Height;
 
 	public static final double hab_2Height;
-	public static final double hab_3Height:
+	public static final double hab_3Height;
 	//enumとどっち？
 
 	public static enum armHeight{
@@ -78,7 +79,7 @@ public class Const{
 	  moveToPanel_1Height,
 	  moveToPanel_2Height,
 
-	  keepLift,
+	  keepLiftHeight,
 
 	//Arm
 	  holdCargo,

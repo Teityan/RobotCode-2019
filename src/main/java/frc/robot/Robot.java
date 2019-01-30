@@ -64,20 +64,28 @@ public class Robot extends TimedRobot {
 
 //variables
   //Drive
-    private double driveXValue, driveYValue;
+    private double driveXValue, driveYValue;//コントローラー制御の値
+    private double driveStraightSetpoint, driveTurnSetpoint;//PID制御の目標値
+    private boolean is_drivePIDOn;//PID制御するかどうか
 
+    private boolean is_lineTraceOn;//ライントレースするかどうか
 
   //Lift
-    private double liftValue;
+    private double liftValue;//コントローラー制御の値
+    private double liftSetpoint;//PID制御の目標値
+    private boolean is_liftPIDOn;//PID制御するかどうか
 
   //Grabber
-    private boolean whetherHoldCargo;
-    private boolean whetherReleaseCargo;
-    private boolean whetherHoldPanel;
-    private boolean lastWhetherHoldPanel = false;
+    private boolean whetherHoldCargo;//カーゴを回収するかどうか
+    private boolean whetherReleaseCargo;//カーゴを射出するかどうか
+    private boolean whetherHoldPanel;//パネルを保持するかどうか
+
+  //Climb
+    private boolean is_climbSolenoidOn;//ストッパーを出すかどうか
+    private double climbMotorValue;//クライムの時の後輪のモーターの値
   
   //Commands
-    private boolean is_commandInput;
+    private boolean is_commandInput;//コマンドが入力されたかどうか
     private Const.Command command = Const.Command.noCommand;
 
 //functions
@@ -86,7 +94,19 @@ public class Robot extends TimedRobot {
   }
 
   private Const.Command getCommand(){
+    //まずそれぞれのボタンの状態を把握
+    boolean buttonPressed[] = new boolean[12];
+
+    buttonPressed[0] = joystick.getTrigger(); 
+    for(int i = 1; i<=12; i++){
+      buttonPressed[i] = joystick.getRawButton(i);
+    }
     
+    /*ここで判定していく
+     *  
+     * 
+     * 
+     */
   }
 @Override
 public void robotInit() {
@@ -171,12 +191,31 @@ public void teleopPeriodic() {
    * これからコマンドやコントローラーで変数の値を変えてから代入する。
    * 操作しないときは出力を出したくないため、最初に出力を出さない状態で初期化する。
    */
+    //Drive
+    driveXValue = 0;
+    driveYValue = 0;
+    is_drivePIDOn = false;
+    is_lineTraceOn = false;
+
+    //Lift
+    liftValue = 0;
+    is_liftPIDOn = false;
+
+    //Grabber
+    whetherHoldCargo = false;
+    whetherReleaseCargo = false;
+   
+    //Climb
+    climbMotorValue = 0;
+  
+    //Commands
+    is_commandInput = true;//入力がなかったらfalseにする。
+
+
 
   /*Command
    * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
    */
-
-    is_commandInput = true;//入力がなかったらfalseにする。
     command = getCommand();//コマンドを判別
 
     switch(command){
@@ -184,6 +223,7 @@ public void teleopPeriodic() {
       case closeToLine:
 
       case lineTrace:
+
 
     /*Lift
      *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
@@ -214,11 +254,14 @@ public void teleopPeriodic() {
         is_liftPIDOn = true;
         break;
 
-      case keepLift:
-        liftValue = Const.keepLiftSpeed;
+      case keepLiftHeight:
+        liftValue = Const.keepLiftHeightSpeed;
         break;
 
-    //Arm
+    /*Arm
+     * ローラーやメカナムを回してカーゴを回収したり射出したりする
+     * 棒を開いたり閉じたりしてパネルを保持したり開放したりする
+     */
      
       case holdCargo:
         whetherHoldCargo = true;
@@ -239,6 +282,7 @@ public void teleopPeriodic() {
      *   3.リフトを下げる。(ここで車体が持ち上がる)
      *   4.モーターを回して前に進む
      */
+
       //1
       case cliimbMoveToHab_2Height:
         liftSetpoint = Const.hab_2Height;
@@ -274,6 +318,7 @@ public void teleopPeriodic() {
       is_commandInput = false;
     }     
   
+    
 
   if(!is_commandInput){
   /*Controller
@@ -290,7 +335,10 @@ public void teleopPeriodic() {
   /*Substitute
    *  コマンドやコントローラーによって変えられた変数を代入する。
    */
-    if(is_drivePIDOn){
+    if(is_lineTraceOn){
+      drive.setLineTraceSetpoint();
+      drive.lineTracePIDEnable();
+    }else if(is_drivePIDOn){
       drive.setSetpoint(driveStraightSetpoint, driveTurnSetpoint);//PID制御
       drive.PIDEnable();
     }else{
@@ -328,6 +376,6 @@ public void teleopPeriodic() {
   
     frontClimbSolenoid.set(is_climbSolenoidOn);//前のベアリング付き爪を出す
     backClimbSolenoid.set(is_climbSolenoidOn);//後ろのモーター付き爪を出す
-    climbMotor.set(climbMotorValue);//後ろのモーターを動かす。
+    climbMotor.set(climbMotorValue);//後ろのモーターを動かす
   }
 }
