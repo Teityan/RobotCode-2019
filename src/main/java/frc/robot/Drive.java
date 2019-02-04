@@ -91,6 +91,12 @@ public class Drive extends DifferentialDrive{
 		return straightController.isEnabled() && turnController.isEnabled();
 	}
 
+	public void PIDReset(){
+		straightController.reset();
+		turnController.reset();
+	}
+	
+
 	public class DrivePIDOutput implements PIDOutput {
 
 		PIDMode m_pid = PIDMode.Default;

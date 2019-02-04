@@ -70,6 +70,9 @@ public class Robot extends TimedRobot {
 
     private boolean is_lineTraceOn;//ライントレースするかどうか
 
+    private double distanceToLine[] = new double[2];
+    private double displayPosition[] = new double[2];
+
   //Lift
     private double liftValue;//コントローラー制御の値
     private double liftSetpoint;//PID制御の目標値
@@ -108,6 +111,39 @@ public class Robot extends TimedRobot {
      * 
      */
   }
+
+  public double[] getDistanceToLine(double[] displayPosition) {
+    double θc = Const.θCamera_rad;
+    double θa = Const.θAngle_rad;
+    double maxH = Const.cameraHeight;
+
+    double x = displayPosition[0];
+    double y = displayPosition[1];
+    double result[] = new double[2]; 
+
+       
+    //double aboveMaxX = maxH * Math.tan(θa);
+    //double minH = maxH - maxY * Math.cos(Math.PI/2 - (θc + θa));     
+    double maxY = maxH / Math.cos(θc) * Math.sin(θa) *2;//縦幅
+        
+    double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(θc)*maxH/Math.cos(θc) - 2*y*maxH*Math.sin(θa)/Math.cos(θc) );
+    double maxX = 2 * distanceCamera_Display * Math.tan(θa);//横幅
+        
+
+    double sinDistanceCamera_Display = y * Math.cos(θa) / distanceCamera_Display;
+    double angleDisplay_LineOfSight  = Math.PI/2 - θa + Math.asin(sinDistanceCamera_Display);
+    double l = y * Math.sin(angleDisplay_LineOfSight) / Math.sin(angleDisplay_LineOfSight + θc + θa);
+    result[1] = maxH * Math.tan(θc) + l;
+        
+       
+    
+    double distanceCamera_DisplayZ = distanceCamera_Display * Math.cos(θc + angleDisplay_LineOfSight);
+    result[0]  = maxH * x / distanceCamera_DisplayZ; 
+
+
+    return result;
+  }
+
 @Override
 public void robotInit() {
     //Controller
@@ -173,10 +209,8 @@ public void autonomousInit() {
    armSolenoid.set(true);//しまってあるアームを展開する
 }
 
-  
 @Override
 public void autonomousPeriodic() {
-    
 }
 
 @Override
@@ -204,16 +238,17 @@ public void teleopPeriodic() {
     //Grabber
     whetherHoldCargo = false;
     whetherReleaseCargo = false;
+     //パネルは押したら変わる制なので初期化はいらない
    
     //Climb
+    is_climbSolenoidOn = false;
     climbMotorValue = 0;
   
     //Commands
     is_commandInput = true;//入力がなかったらfalseにする。
 
 
-
-  /*Command
+  /*Command*
    * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
    */
     command = getCommand();//コマンドを判別
@@ -221,6 +256,9 @@ public void teleopPeriodic() {
     switch(command){
     //Drive
       case closeToLine:
+        distanceToLine = getDistanceToLine(displayPosition);
+        driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
+        driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
 
       case lineTrace:
 
@@ -312,7 +350,7 @@ public void teleopPeriodic() {
 
 
 
-
+    //NoCommand
       case noCommand:
       default:
       is_commandInput = false;
