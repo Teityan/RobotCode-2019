@@ -72,6 +72,13 @@ public class Lift {
         this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, liftMotor);
     }
 
+	/**
+	 * ToDo
+	 */
+	public void applyState(State state) {
+
+	}
+
     //モーター
     public void setSpeed(double speed) {
         liftMotor.set(speed);

@@ -28,6 +28,13 @@ public class Grabber {
         this.armSolenoid = armSolenoid;
     }
 
+	/**
+	 * ToDo
+	 */
+	public void applyState(State state) {
+
+    }
+    
     public void holdCargo(){
         rollerMotor.set(1.0);//設置によっては±変わる
         is_RollerMoving = true;

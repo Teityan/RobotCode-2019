@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
     private State state;
@@ -143,11 +142,9 @@ public class Robot extends TimedRobot {
         frontClimbSolenoid = new Solenoid(Const.FrontClimbSolenoidPort);
         backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
 
-        // PIDController
+        // Submodules
         drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
-        //lift = new Lift(liftMotor, liftEncoder);
-
-        // Grabber
+        lift = new Lift(liftMotor, liftEncoder);
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
 
         // Sensor
@@ -157,7 +154,7 @@ public class Robot extends TimedRobot {
         leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
 
         // Camera
-        camera = camera.getInstance();
+        camera = CameraServer.getInstance();
         camera.startAutomaticCapture();
 
         // NetworkTable
@@ -188,6 +185,17 @@ public class Robot extends TimedRobot {
          * 操作しないときは出力を出したくないため、最初に出力を出さない状態で初期化する。
          */
         state.stateInit();
+
+        /**
+         * Joystickやセンサーからの入力を受け取ってstate objectに値を流しこむ
+         */
+
+        /**
+         * Stateをapplyする
+         */
+        drive.applyState(state);
+        lift.applyState(state);
+        grabber.applyState(state);
 
         /*Command*
          * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。

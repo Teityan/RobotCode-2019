@@ -40,6 +40,13 @@ public class Drive extends DifferentialDrive{
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
+	/**
+	 * ToDo
+	 */
+	public void applyState(State state) {
+
+	}
+
 	
 
 	public void setRelativeStraightSetpoint(double setpoint) {
