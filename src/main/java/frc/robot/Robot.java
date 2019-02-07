@@ -19,8 +19,6 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Const.Command;
-
 
 public class Robot extends TimedRobot {
     private State state;
@@ -73,7 +71,7 @@ public class Robot extends TimedRobot {
 
     // functions
     private double deadbandProcessing(double value) {
-        return Math.abs(value) > Const.deadband ? value : 0 ;
+        return Math.abs(value) > Const.Deadband ? value : 0 ;
     }
 
     /**
@@ -81,8 +79,8 @@ public class Robot extends TimedRobot {
      *
      */
     public double[] geLinePosition(double[] displayPosition) {
-        double theta_c = Const.theta_Camera_rad;
-        double theta_a = Const.theta_Angle_rad;
+        double theta_c = Const.Theta_Camera_rad;
+        double theta_a = Const.Theta_Angle_rad;
         double maxH = Const.cameraHeight;
 
         // xは中央から右向き正  yは下から上向き正
@@ -110,40 +108,40 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         // Controller
-        joystick = new Joystick(Const.joystickPort);
+        joystick = new Joystick(Const.JoystickPort);
 
 
         // Motors
-        driveRightFront  = new Spark(Const.driveRightFrontPort);
-        driveRightBack = new Spark(Const.driveRightBackPort);
-        driveLeftFront = new Spark(Const.driveLeftFrontPort);
-        driveLeftBack = new Spark(Const.driveLeftBackPort);
+        driveRightFront  = new Spark(Const.DriveRightFrontPort);
+        driveRightBack = new Spark(Const.DriveRightBackPort);
+        driveLeftFront = new Spark(Const.DriveLeftFrontPort);
+        driveLeftBack = new Spark(Const.DriveLeftBackPort);
 
-        liftMotor = new Talon(Const.liftMotorPort);
+        liftMotor = new Talon(Const.LiftMotorPort);
 
-        rollerMotor = new Talon(Const.rollerMotorPort);
+        rollerMotor = new Talon(Const.RollerMotorPort);
 
-        climbMotor = new Talon(Const.climbMotorPort);
+        climbMotor = new Talon(Const.ClimbMotorPort);
 
         // SpeedControllerGroup
-        rightDriveGroup = new SpeedControllerGroup(Const.driveRightFront, Const.driveRightBack);
-        leftDriveGroup = new SpeedControllerGroup(Const.driveLeftFront, Const.driveLeftBack);
+        rightDriveGroup = new SpeedControllerGroup(driveRightFront, driveRightBack);
+        leftDriveGroup = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
 
         // Encoder,Gyro
-        rightDriveEncoder = new Encoder(Const.rightDriveEncoderAPort, Const.rightDriveEncoderBPort);
-        leftDriveEncoder = new Encoder(Const.leftDriveEncoderAPort, Const.leftDriveEncoderBPort);
+        rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
+        leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
         driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
 
-        liftEncoder = new Encoder(Const.liftEncoderPort, );
+        liftEncoder = new Encoder(Const.LiftEncoderAPort, Const.LiftEncoderBPort);
 
         gyro = new ADXRS450_Gyro();
 
         // Solenoid
-        armSolenoid = new Solenoid(Const.armSolenoidPort);
-        barSolenoid = new Solenoid(Const.barSolenoidPort);
+        armSolenoid = new Solenoid(Const.ArmSolenoidPort);
+        barSolenoid = new Solenoid(Const.BarSolenoidPort);
 
-        frontClimbSolenoid = new Solenoid(Const.frontClimbSolenoidPort);
-        backClimbSolenoid = new Solenoid(Const.backClimbSolenoidPort);
+        frontClimbSolenoid = new Solenoid(Const.FrontClimbSolenoidPort);
+        backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
 
         // PIDController
         drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
@@ -153,17 +151,17 @@ public class Robot extends TimedRobot {
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
 
         // Sensor
-        rightFrontSensor = new AnalogInput(Const.rightFrontSensorPort);
-        rightBackSensor = new AnalogInput(Const.rightBackSensorPort);
-        leftFrontSensor = new AnalogInput(Const.leftFrontSensorPort);
-        leftBackSensor = new AnalogInput(Const.leftBackSensorPort);
+        rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
+        rightBackSensor = new AnalogInput(Const.RightBackSensorPort);
+        leftFrontSensor = new AnalogInput(Const.LeftFrontSensorPort);
+        leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
 
         // Camera
         camera = camera.getInstance();
         camera.startAutomaticCapture();
 
         // NetworkTable
-        networkTable = networkTable.getSubTable(Const.lineFindNetworkTable);
+        networkTable = networkTable.getSubTable(Const.LineFindNetworkTable);
 
         // State
         state = new State();
@@ -302,16 +300,6 @@ public class Robot extends TimedRobot {
       
         
 
-      if(!state.is_noCommand){
-      /*Controller
-       * コマンドがなかった時にコントローラーから値を受け取り代入する。
-       */
-        state.driveXSpeed = deadbandProcessing(joystick.getX());// 右に傾ける(右に回る)と正
-        state.driveYSpeed = deadbandProcessing(joystick.getY());
-
-        state.liftSpeed = deadbandProcessing((-joystick.getThrottle()+ 1)/2);// 下で0上で1
-        
-      }
 
 
   /*Substitute

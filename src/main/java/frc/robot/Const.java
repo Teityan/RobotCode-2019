@@ -8,48 +8,49 @@ public class Const {
 	public static final int JoystickPort = 0;
 	
 	// DriveBaseMotors
-	public static final int DriveRightFrontPort;
-	public static final int DriveRightBackPort;
-	public static final int DriveLeftFrontPort;
-	public static final int DriveLeftBackPort;
+	public static final int DriveRightFrontPort = 0;
+	public static final int DriveRightBackPort = 0;
+	public static final int DriveLeftFrontPort = 0;
+	public static final int DriveLeftBackPort = 0;
 	
 	// LiftMotors
-	public static final int LiftMotorPort;
-	public static final double KeepLiftHeightSpeed;
+	public static final int LiftMotorPort = 0;
+	public static final double KeepLiftHeightSpeed = 0;
 
 	// ArmSolenoids & Motors
-	public static final int ArmSolenoidPort;
-	public static final int BarSolenoidPort;
-	public static final int RollerMotorPort;
+	public static final int ArmSolenoidPort = 0;
+	public static final int BarSolenoidPort = 0;
+	public static final int RollerMotorPort = 0;
 
 	// Solenoids & Motors for climbing
-	public static final int FrontClimbSolenoidPort;
-	public static final int BackClimbSolenoidPort;
-	public static final int ClimbMotorPort;
+	public static final int FrontClimbSolenoidPort = 0;
+	public static final int BackClimbSolenoidPort = 0;
+	public static final int ClimbMotorPort = 0;
 	
 	// DriveBaseEncoders
-	public static final int RightDriveEncoderAPort;
-	public static final int RightDriveEncoderBPort;
-	public static final int ReftDriveEncoderAPort;
-	public static final int ReftDriveEncoderBPort;
+	public static final int RightDriveEncoderAPort = 0;
+	public static final int RightDriveEncoderBPort = 0;
+	public static final int LeftDriveEncoderAPort = 0;
+	public static final int LeftDriveEncoderBPort = 0;
 
 	// LiftEncoders
-	public static final int RiftEncoderPort;
+	public static final int LiftEncoderAPort = 0;
+	public static final int LiftEncoderBPort = 0;
 
 	// Senosors for line trace
-	public static final int RightFrontSensorPort;
-	public static final int RightBackSensorPort;
-	public static final int LeftFrontSensorPort;
-	public static final int LeftBackSensorPort;
+	public static final int RightFrontSensorPort = 0;
+	public static final int RightBackSensorPort = 0;
+	public static final int LeftFrontSensorPort = 0;
+	public static final int LeftBackSensorPort = 0;
 	
 	/**
 		Field Dimension	
 	 */
-	public static final double ShipCargoHeight;
-	public static final double RocketCargoFirstHeight;
-	public static final double RocketCargoSecondHeight;
-	public static final double FirstPanelHeight;
-	public static final double SecondPanelHeight;
+	public static final double ShipCargoHeight = 0;
+	public static final double RocketCargoFirstHeight = 0;
+	public static final double RocketCargoSecondHeight = 0;
+	public static final double FirstPanelHeight = 0;
+	public static final double SecondPanelHeight = 0;
 	//public static final double HabSecondHeight;
 	//public static final double HabThirdHeight;
 
@@ -61,17 +62,17 @@ public class Const {
     public static final double LiftEncoderDistancePerPulse = 0;
 	
 	// NetworkTable for finding lines
-	public static final String LineFindNetworkTable;
+	public static final String LineFindNetworkTable = "";
 
 	public static enum ArmHeight {
-		shipCargoHeight(),
-		rocketFirstCargoHeight(),
-		rocketSecondCargoHeight(),
-		panel_1Height(),
-		panel_2Height();		
+		shipCargoHeight(0),
+		rocketFirstCargoHeight(0),
+		rocketSecondCargoHeight(0),
+		panel_1Height(0),
+		panel_2Height(0);		
 
 		public double height;
-		private armHeight(double height){
+		private  ArmHeight(double height){
 			this.height = height;
 		}
 	}
@@ -95,8 +96,8 @@ public class Const {
 	public static final double maxAcceleration = 0.5;
 
 	//Constants for getting distance to the line
-	public static final double θCamera_rad = Math.toRadians();
-	public static final double θAngle_rad = Math.toRadians();
-	public static final double cameraHeight;
+	public static final double Theta_Camera_rad = Math.toRadians(0);
+	public static final double Theta_Angle_rad = Math.toRadians(0);
+	public static final double cameraHeight = 0;
 	
 }

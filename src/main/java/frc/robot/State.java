@@ -38,7 +38,7 @@ public class State {
     public double climbMotorSpeed;  // クライムの時の後輪のモーターの値
 
     public State() {
-        stateInit()
+        stateInit();
     }
 
     public void stateInit(){
@@ -64,7 +64,7 @@ public class State {
     }
 
     public void printVariables(){
-        SmartDashboard.putNumber("driveXSpeed", driveXSpeed);
+        SmartDashboard.putNumber("driveStraightSpeed", driveStraightSpeed);
     }
 
 }

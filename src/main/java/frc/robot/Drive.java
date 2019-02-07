@@ -34,9 +34,9 @@ public class Drive extends DifferentialDrive{
 		this.e_drive = e_drive;
 		this.g_drive = g_drive;
 
-		straightController = new PIDController(Const.kp_straight, Const.ki_straight, Const.kd_straight, e_drive,
+		straightController = new PIDController(Const.DriveStraightKp, Const.DriveStraightKi, Const.DriveStraightKd, e_drive,
 				new DrivePIDOutput(PIDMode.Straight));
-		turnController = new PIDController(Const.kp_rotate, Const.ki_rotate, Const.kd_rotate, g_drive,
+		turnController = new PIDController(Const.DriveRotateKp, Const.DriveRotateKi, Const.DriveRotateKd, g_drive,
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
@@ -94,9 +94,8 @@ public class Drive extends DifferentialDrive{
 	public void PIDReset(){
 		straightController.reset();
 		turnController.reset();
-	}]
+	}
 
-	public 
 	
 
 	public class DrivePIDOutput implements PIDOutput {
