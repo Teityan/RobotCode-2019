@@ -7,6 +7,10 @@
 
 package frc.robot;
 
+import edu.wpi.cscore.CvSink;
+import edu.wpi.cscore.CvSource;
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
