@@ -102,7 +102,7 @@ public class Lift {
     }
 
     public void setSetopoint(PredefinedSetpoint point){
-        pid.setSetpoint(point.getHeight());
+        pid.setSetpoint(point.getSetpoint());
     }
 
 }
