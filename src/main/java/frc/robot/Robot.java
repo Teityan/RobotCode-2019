@@ -14,90 +14,70 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Const.Command;
 
 
 public class Robot extends TimedRobot {
-//Controller
+  // Controller
   private Joystick joystick;
 
-//Motors
-  private  driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
-  private  liftMotor;
-  private  rollerMotor;
-  private  climbMotor;
+  //Motors
+  private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
+  private Talon liftMotor;
+  private Talon rollerMotor;
+  private Talon climbMotor;
 
-//SpeedControllerGroup
+// SpeedControllerGroup
   private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
 
-//Encoder,Gyro
+// Encoder, Gyro
   private Encoder rightDriveEncoder, leftDriveEncoder;
   private EncoderGroup driveEncoder;
   private Encoder liftEncoder;
   private ADXRS450_Gyro gyro;
 
-//Solenoid
+// Solenoid
   private Solenoid armSolenoid, barSolenoid;
   private Solenoid frontClimbSolenoid, backClimbSolenoid;
 
-//PIDController
+// SubModule
   private Drive drive;
   private Lift lift;
-
-//Grabber
   private Grabber grabber;
 
-//Sensor
+// ライントレース用のセンサー　
+// 0～3.3V 白線があると電圧が上がる 
+
   private AnalogInput rightFrontSensor, 
                       rightBackSensor, 
                       leftFrontSensor, 
                       leftBackSensor;
 
-//Camera
+// Camera
   private CameraServer camera;
 
-//NetWorkTable
+// NetWorkTable
   private NetworkTable networkTable;
 
 
-//variables
-  //Drive
-    private double driveXValue, driveYValue;//コントローラー制御の値
-    private double driveStraightSetpoint, driveTurnSetpoint;//PID制御の目標値
-    private boolean is_drivePIDOn;//PID制御するかどうか
+// variables
 
-    private boolean is_lineTraceOn;//ライントレースするかどうか
+  private State state;
+  private double distanceToLine[] = new double[2], 
+        displayPosition[] = new double[2];
 
-    private double distanceToLine[] = new double[2];
-    private double displayPosition[] = new double[2];
-
-  //Lift
-    private double liftValue;//コントローラー制御の値
-    private double liftSetpoint;//PID制御の目標値
-    private boolean is_liftPIDOn;//PID制御するかどうか
-
-  //Grabber
-    private boolean whetherHoldCargo;//カーゴを回収するかどうか
-    private boolean whetherReleaseCargo;//カーゴを射出するかどうか
-    private boolean whetherHoldPanel;//パネルを保持するかどうか
-
-  //Climb
-    private boolean is_climbSolenoidOn;//ストッパーを出すかどうか
-    private double climbMotorValue;//クライムの時の後輪のモーターの値
-  
-  //Commands
-    private boolean is_commandInput;//コマンドが入力されたかどうか
-    private Const.Command command = Const.Command.noCommand;
-
-//functions
-  private double deadbandProcessing(double value){
-    return value * Math.abs(value) > Const.deadband ? 1 : 0 ;
+// functions
+  private double deadbandProcessing(double value) {
+    return Math.abs(value) > Const.deadband ? value : 0 ;
   }
 
-  private Const.Command getCommand(){
-    //まずそれぞれのボタンの状態を把握
+  private Const.Command getCommand() {
+    // まずそれぞれのボタンの状態を把握
     boolean buttonPressed[] = new boolean[12];
 
     buttonPressed[0] = joystick.getTrigger(); 
@@ -106,28 +86,83 @@ public class Robot extends TimedRobot {
     }
     
     /*ここで判定していく
+    Joystickの場合
+     *  3 Drive関係
+     *  |__7 closeToLine   
+     *  |__8 lineTrace
+     * 
+     *  4 Lift関係
+     *  |__7 moveToShipCargoHeight
+     *  |__8 moveToRocketCargo_1Height
+     *  |__9 moveToRocketCargo_2Height
+     *  |__10 moveToPanel_1Height
+     *  |__11 moveToPanel_2Height
+     *  |__12 keepLiftHeight
+     * 
+     *  5 Grabber関係
+     *  |__7 holdCargo
+     *  |__8 releaseCargo
+     *  |__9 changeBarState
      *  
-     * 
-     * 
+     *  6 Climb関係
+     *  |__7 climbMoveToHab_2Height
+     *  |__8 climbMoveToHab_3Height
+     *  |__9 climbStopperOn
+     *  |__10 climbLiftDown
+     *  |__11 climbAdvance
+     *  
      */
+
+     if(buttonPressed[3]){
+      if(buttonPressed[7])
+      if(buttonPressed[8])
+     }
+
+     if(buttonPressed[4]){
+      if(buttonPressed[7])
+      if(buttonPressed[8])
+      if(buttonPressed[9])
+      if(buttonPressed[10])
+      if(buttonPressed[11])
+      if(buttonPressed[12])
+     }
+
+     if(buttonPressed[5]){
+      if(buttonPressed[7])
+      if(buttonPressed[8])
+      if(buttonPressed[9])
+     }
+
+     if(buttonPressed[6]){
+      if(buttonPressed[7])
+      if(buttonPressed[8])
+      if(buttonPressed[9])
+      if(buttonPressed[10])
+      if(buttonPressed[11])
+     }
+     
+     return Command.noCommand;
+
+
   }
 
-  public double[] getDistanceToLine(double[] displayPosition) {
+  public double[] geLinePosition(double[] displayPosition) {
     double θc = Const.θCamera_rad;
     double θa = Const.θAngle_rad;
     double maxH = Const.cameraHeight;
 
+    // xは中央から右向き正  yは下から上向き正
     double x = displayPosition[0];
     double y = displayPosition[1];
     double result[] = new double[2]; 
 
        
-    //double aboveMaxX = maxH * Math.tan(θa);
-    //double minH = maxH - maxY * Math.cos(Math.PI/2 - (θc + θa));     
-    double maxY = maxH / Math.cos(θc) * Math.sin(θa) *2;//縦幅
+    // double aboveMaxX = maxH * Math.tan(θa);
+    // double minH = maxH - maxY * Math.cos(Math.PI/2 - (θc + θa));     
+    double maxY = maxH / Math.cos(θc) * Math.sin(θa) *2;// 縦幅
         
     double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(θc)*maxH/Math.cos(θc) - 2*y*maxH*Math.sin(θa)/Math.cos(θc) );
-    double maxX = 2 * distanceCamera_Display * Math.tan(θa);//横幅
+    double maxX = 2 * distanceCamera_Display * Math.tan(θa);// 横幅
         
 
     double sinDistanceCamera_Display = y * Math.cos(θa) / distanceCamera_Display;
@@ -146,67 +181,70 @@ public class Robot extends TimedRobot {
 
 @Override
 public void robotInit() {
-    //Controller
+    // Controller
     joystick = new Joystick(Const.joystickPort);
 
 
-    //Motors
-    driveRightFront  = new (Const.driveRightFrontPort);
-    driveRightBack = new (Const.driveRightBackPort);
-    driveLeftFront = new (Const.driveLeftFrontPort);
-    driveLeftBack = new (Const.driveLeftBackPort);
+    // Motors
+    driveRightFront  = new Spark(Const.driveRightFrontPort);
+    driveRightBack = new Spark(Const.driveRightBackPort);
+    driveLeftFront = new Spark(Const.driveLeftFrontPort);
+    driveLeftBack = new Spark(Const.driveLeftBackPort);
 
-    liftMotor = new (Const.liftMotorPort);
+    liftMotor = new Talon(Const.liftMotorPort);
 
-    rollerMotor = new (Const.rollerMotorPort);
+    rollerMotor = new Talon(Const.rollerMotorPort);
 
-    climbMotor = new (Const.climbMotorPort);
+    climbMotor = new Talon(Const.climbMotorPort);
 
-    //SpeedControllerGroup
+    // SpeedControllerGroup
     rightDriveGroup = new SpeedControllerGroup(Const.driveRightFront, Const.driveRightBack);
     leftDriveGroup = new SpeedControllerGroup(Const.driveLeftFront, Const.driveLeftBack);
 
-    //Encoder,Gyro
-    rightDriveEncoder = new Enocoder(Const.rightDriveEncoderAPort, Const.rightDriveEncoderBPort);
-    leftDriveEncoder = new Enocder(Cosnt.leftDriveEncoderAPort, Const.leftDriveEncoderBPort);
+    // Encoder,Gyro
+    rightDriveEncoder = new Encoder(Const.rightDriveEncoderAPort, Const.rightDriveEncoderBPort);
+    leftDriveEncoder = new Encoder(Const.leftDriveEncoderAPort, Const.leftDriveEncoderBPort);
     driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
 
-    liftEncoder = new Encoder(Const.liftEncoderPort);
+    liftEncoder = new Encoder(Const.liftEncoderPort, );
 
     gyro = new ADXRS450_Gyro();
 
-    //Solenoid
+    // Solenoid
     armSolenoid = new Solenoid(Const.armSolenoidPort);
     barSolenoid = new Solenoid(Const.barSolenoidPort);
 
     frontClimbSolenoid = new Solenoid(Const.frontClimbSolenoidPort);
     backClimbSolenoid = new Solenoid(Const.backClimbSolenoidPort);
 
-    //PIDController
+    // PIDController
     drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
-    lift = new Lift(liftMotor, liftEncoder);
+    //lift = new Lift(liftMotor, liftEncoder);
 
-    //Grabber
+    // Grabber
     grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
 
-    //Sensor
+    // Sensor
     rightFrontSensor = new AnalogInput(Const.rightFrontSensorPort);
     rightBackSensor = new AnalogInput(Const.rightBackSensorPort);
-    leftFrontSensor = new AnalogInput(Const.leftFrontSensor);
-    leftBackSensor = new AnalogInput(Const.leftBackSensor);
+    leftFrontSensor = new AnalogInput(Const.leftFrontSensorPort);
+    leftBackSensor = new AnalogInput(Const.leftBackSensorPort);
 
-    //Camera
+    // Camera
     camera = camera.getInstance();
     camera.startAutomaticCapture();
 
-    //NetworkTable
+    // NetworkTable
     networkTable = networkTable.getSubTable(Const.lineFindNetworkTable);
+
+    // State
+    state = new State();
     
   }
   
 @Override
 public void autonomousInit() {
-   armSolenoid.set(true);//しまってあるアームを展開する
+   armSolenoid.set(true);// しまってあるアームを展開する
 }
 
 @Override
@@ -216,7 +254,7 @@ public void autonomousPeriodic() {
 @Override
 public void teleopInit() {
   drive.PIDReset();
-  lift.PIDReset();
+  //lift.PIDReset();
 }
   
 @Override
@@ -225,75 +263,58 @@ public void teleopPeriodic() {
    * これからコマンドやコントローラーで変数の値を変えてから代入する。
    * 操作しないときは出力を出したくないため、最初に出力を出さない状態で初期化する。
    */
-    //Drive
-    driveXValue = 0;
-    driveYValue = 0;
-    is_drivePIDOn = false;
-    is_lineTraceOn = false;
-
-    //Lift
-    liftValue = 0;
-    is_liftPIDOn = false;
-
-    //Grabber
-    whetherHoldCargo = false;
-    whetherReleaseCargo = false;
-     //パネルは押したら変わる制なので初期化はいらない
-   
-    //Climb
-    is_climbSolenoidOn = false;
-    climbMotorValue = 0;
-  
-    //Commands
-    is_commandInput = true;//入力がなかったらfalseにする。
+    state.stateInit();
 
 
   /*Command*
    * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
    */
-    command = getCommand();//コマンドを判別
+    state.command = getCommand();// コマンドを判別
 
-    switch(command){
-    //Drive
+
+    switch(state.command){
+    // Drive
       case closeToLine:
-        distanceToLine = getDistanceToLine(displayPosition);
-        driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
-        driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
+        distanceToLine = getLinePosition(displayPosition);
+        state.driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
+        state.driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
+        break;
 
       case lineTrace:
 
+        break;
 
     /*Lift
      *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
-     *  モーターの値を制御するならliftValueに代入
+     *  モーターの値を制御するならliftSpeedに代入
      */
       case moveToShipCargoHeight:
-        liftSetpoint = Const.shipCargoHeight;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.shipCargoHeight;
+        state.is_liftPIDOn = true;
         break;
 
       case moveToRocketCargo_1Height:
-        liftSetpoint = Const.rocketCargo_1Height;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.rocketCargo_1Height;
+        state.is_liftPIDOn = true;
         break;
 
       case moveToRocketCargo_2Height:
-        liftSetpoint = Const.rocketCargo_2Height;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.rocketCargo_2Height;
+        state.is_liftPIDOn = true;
         break;
 
       case moveToPanel_1Height:
-        liftSetpoint = Const.panel_1Height;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.panel_1Height;
+        state.is_liftPIDOn = true;
         break;
 
       case moveToPanel_2Height:
-        liftSetpoint = Const.panel_2Height;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.panel_2Height;
+        state.is_liftPIDOn = true;
         break;
 
       case keepLiftHeight:
-        liftValue = Const.keepLiftHeightSpeed;
+        state.liftSpeed = Const.keepLiftHeightSpeed;
         break;
 
     /*Arm
@@ -302,15 +323,15 @@ public void teleopPeriodic() {
      */
      
       case holdCargo:
-        whetherHoldCargo = true;
+        state.whetherHoldCargo = true;
         break;
 
       case releaseCargo:
-        whetherReleaseCargo = true;
+        state.whetherReleaseCargo = true;
         break;
 
       case changeBarState:
-        whetherHoldPanel = !whetherHoldPanel;//ボタンを押したら状態が変わる
+        state.whetherHoldPanel = !state.whetherHoldPanel;// ボタンを押したら状態が変わる
         break;
 
     /*Climb
@@ -321,51 +342,51 @@ public void teleopPeriodic() {
      *   4.モーターを回して前に進む
      */
 
-      //1
-      case cliimbMoveToHab_2Height:
-        liftSetpoint = Const.hab_2Height;
-        is_liftPIDOn = true;
+      // 1
+      case climbMoveToHab_2Height:
+        state.liftSetpoint = Const.hab_2Height;
+        state.is_liftPIDOn = true;
         break;
 
       case climbMoveToHab_3Height:
-        liftSetpoint = Const.hab_3Height;
-        is_liftPIDOn = true;
+        state.liftSetpoint = Const.hab_3Height;
+        state.is_liftPIDOn = true;
         break;
 
-      //2
+      // 2
       case climbStopperOn:
-        is_climbSolenoidOn = true;
+        state.is_climbSolenoidOn = true;
         break;
 
-      //3
+      // 3
       case climbLiftDown:
-        liftValue = -1.0;
+        state.liftSpeed = -1.0;
         break;
 
-      //4
+      // 4
       case climbAdvance:
-        driveXValue = ;
-        climbMotorValue = 1.0;
+        state.driveXSpeed = 0;
+        state.climbMotorSpeed = 1.0;
         break;
 
 
 
-    //NoCommand
+    // NoCommand
       case noCommand:
       default:
-      is_commandInput = false;
+      state.is_noCommand = false;
     }     
   
     
 
-  if(!is_commandInput){
+  if(!state.is_noCommand){
   /*Controller
    * コマンドがなかった時にコントローラーから値を受け取り代入する。
    */
-    driveXValue = deadbandProcessing(joystick.getX());
-    driveYValue = deadbandProcessing(joystick.getY());
+    state.driveXSpeed = deadbandProcessing(joystick.getX());// 右に傾ける(右に回る)と正
+    state.driveYSpeed = deadbandProcessing(joystick.getY());
 
-    liftValue = deadbandProcessing(joystick.getThrottle());
+    state.liftSpeed = deadbandProcessing((-joystick.getThrottle()+ 1)/2);// 下で0上で1
     
   }
 
@@ -373,47 +394,53 @@ public void teleopPeriodic() {
   /*Substitute
    *  コマンドやコントローラーによって変えられた変数を代入する。
    */
-    if(is_lineTraceOn){
-      drive.setLineTraceSetpoint();
-      drive.lineTracePIDEnable();
-    }else if(is_drivePIDOn){
-      drive.setSetpoint(driveStraightSetpoint, driveTurnSetpoint);//PID制御
+   /*
+    drive.applyState(state);
+    //lift.applyState(state);
+    grabber.applyState(state);
+
+    if(state.is_lineTraceOn){
+      //drive.setLineTraceSetpoint();
+      //drive.lineTracePIDEnable();
+    }else if(state.is_drivePIDOn){
+      drive.setSetpoint(state.driveStraightSetpoint, state.driveTurnSetpoint);// PID制御
       drive.PIDEnable();
     }else{
       drive.PIDDisable();
-      drive.arcadeDrive(driveXValue, driveYValue);//普通のモーター制御
+      drive.arcadeDrive(driveXSpeed, driveYSpeed);// 普通のモーター制御
     }
 
 
     if(is_liftPIDOn){
-      lift.setSetpoint(liftSetpoint);//PID制御
+      lift.setSetpoint(liftSetpoint);// PID制御
       lift.PIDEnable();
     }else{
       lift.PIDDisable();
-      lift.setSpeed(liftValue);//普通のモーター制御
+      lift.setSpeed(liftSpeed);// 普通のモーター制御
     }
 
       
     if(whetherHoldCargo){
-      grabber.holdCargo();//カーゴを回収
+      grabber.holdCargo();// カーゴを回収
     }else{
-      grabber.stopRoller();//ローラーを止める
+      grabber.stopRoller();// ローラーを止める
     }
 
     if(whetherReleaseCargo){
-      grabber.releaseCargo();//カーゴ射出
+      grabber.releaseCargo();// カーゴ射出
     }else{
-      grabber.stopRoller();//ローラーを止める
+      grabber.stopRoller();// ローラーを止める
     }
       
     if(whetherHoldPanel){
-      grabber.holdPanel();//パネルをつかむ
+      grabber.holdPanel();// パネルをつかむ
     }else{
-      grabber.releasePanel();//パネルを離す
+      grabber.releasePanel();// パネルを離す
     }
   
-    frontClimbSolenoid.set(is_climbSolenoidOn);//前のベアリング付き爪を出す
-    backClimbSolenoid.set(is_climbSolenoidOn);//後ろのモーター付き爪を出す
-    climbMotor.set(climbMotorValue);//後ろのモーターを動かす
+    frontClimbSolenoid.set(is_climbSolenoidOn);// 前のベアリング付き爪を出す
+    backClimbSolenoid.set(is_climbSolenoidOn);// 後ろのモーター付き爪を出す
+    climbMotor.set(climbMotorSpeed);// 後ろのモーターを動かす
+    */
   }
 }

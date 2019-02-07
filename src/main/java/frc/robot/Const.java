@@ -89,8 +89,14 @@ public class Const {
 	public static final double LiftKp = 0;
 	public static final double LiftKi = 0;
 	public static final double LiftKd = 0;
-	
+
 	// Constants for limitting acceleration
 	public static final double PIDPeriod = 0.05;
 	public static final double maxAcceleration = 0.5;
+
+	//Constants for getting distance to the line
+	public static final double θCamera_rad = Math.toRadians();
+	public static final double θAngle_rad = Math.toRadians();
+	public static final double cameraHeight;
+	
 }
