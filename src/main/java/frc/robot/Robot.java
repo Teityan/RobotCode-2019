@@ -7,91 +7,413 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the TimedRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the build.gradle file in the
- * project.
- */
+
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+//Controller
+  private Joystick joystick;
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+//Motors
+  private  driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
+  private  liftMotor;
+  private  rollerMotor;
+  private  climbMotor;
+
+//SpeedControllerGroup
+  private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
+
+//Encoder,Gyro
+  private Encoder rightDriveEncoder, leftDriveEncoder;
+  private EncoderGroup driveEncoder;
+  private Encoder liftEncoder;
+  private ADXRS450_Gyro gyro;
+
+//Solenoid
+  private Solenoid armSolenoid, barSolenoid;
+  private Solenoid frontClimbSolenoid, backClimbSolenoid;
+
+//PIDController
+  private Drive drive;
+  private Lift lift;
+
+//Grabber
+  private Grabber grabber;
+
+//Sensor
+  private AnalogInput rightFrontSensor, 
+                      rightBackSensor, 
+                      leftFrontSensor, 
+                      leftBackSensor;
+
+//Camera
+  private CameraServer camera;
+
+//NetWorkTable
+  private NetworkTable networkTable;
+
+
+//variables
+  //Drive
+    private double driveXValue, driveYValue;//コントローラー制御の値
+    private double driveStraightSetpoint, driveTurnSetpoint;//PID制御の目標値
+    private boolean is_drivePIDOn;//PID制御するかどうか
+
+    private boolean is_lineTraceOn;//ライントレースするかどうか
+
+    private double distanceToLine[] = new double[2];
+    private double displayPosition[] = new double[2];
+
+  //Lift
+    private double liftValue;//コントローラー制御の値
+    private double liftSetpoint;//PID制御の目標値
+    private boolean is_liftPIDOn;//PID制御するかどうか
+
+  //Grabber
+    private boolean whetherHoldCargo;//カーゴを回収するかどうか
+    private boolean whetherReleaseCargo;//カーゴを射出するかどうか
+    private boolean whetherHoldPanel;//パネルを保持するかどうか
+
+  //Climb
+    private boolean is_climbSolenoidOn;//ストッパーを出すかどうか
+    private double climbMotorValue;//クライムの時の後輪のモーターの値
+  
+  //Commands
+    private boolean is_commandInput;//コマンドが入力されたかどうか
+    private Const.Command command = Const.Command.noCommand;
+
+//functions
+  private double deadbandProcessing(double value){
+    return value * Math.abs(value) > Const.deadband ? 1 : 0 ;
   }
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
-  @Override
-  public void robotPeriodic() {
-  }
+  private Const.Command getCommand(){
+    //まずそれぞれのボタンの状態を把握
+    boolean buttonPressed[] = new boolean[12];
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to
-   * the switch structure below with additional strings. If using the
-   * SendableChooser make sure to add them to the chooser code above as well.
-   */
-  @Override
-  public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
-  }
-
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
+    buttonPressed[0] = joystick.getTrigger(); 
+    for(int i = 1; i<=12; i++){
+      buttonPressed[i] = joystick.getRawButton(i);
     }
+    
+    /*ここで判定していく
+     *  
+     * 
+     * 
+     */
   }
 
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
+  public double[] getDistanceToLine(double[] displayPosition) {
+    double θc = Const.θCamera_rad;
+    double θa = Const.θAngle_rad;
+    double maxH = Const.cameraHeight;
+
+    double x = displayPosition[0];
+    double y = displayPosition[1];
+    double result[] = new double[2]; 
+
+       
+    //double aboveMaxX = maxH * Math.tan(θa);
+    //double minH = maxH - maxY * Math.cos(Math.PI/2 - (θc + θa));     
+    double maxY = maxH / Math.cos(θc) * Math.sin(θa) *2;//縦幅
+        
+    double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(θc)*maxH/Math.cos(θc) - 2*y*maxH*Math.sin(θa)/Math.cos(θc) );
+    double maxX = 2 * distanceCamera_Display * Math.tan(θa);//横幅
+        
+
+    double sinDistanceCamera_Display = y * Math.cos(θa) / distanceCamera_Display;
+    double angleDisplay_LineOfSight  = Math.PI/2 - θa + Math.asin(sinDistanceCamera_Display);
+    double l = y * Math.sin(angleDisplay_LineOfSight) / Math.sin(angleDisplay_LineOfSight + θc + θa);
+    result[1] = maxH * Math.tan(θc) + l;
+        
+       
+    
+    double distanceCamera_DisplayZ = distanceCamera_Display * Math.cos(θc + angleDisplay_LineOfSight);
+    result[0]  = maxH * x / distanceCamera_DisplayZ; 
+
+
+    return result;
   }
 
-  /**
-   * This function is called periodically during test mode.
+@Override
+public void robotInit() {
+    //Controller
+    joystick = new Joystick(Const.joystickPort);
+
+
+    //Motors
+    driveRightFront  = new (Const.driveRightFrontPort);
+    driveRightBack = new (Const.driveRightBackPort);
+    driveLeftFront = new (Const.driveLeftFrontPort);
+    driveLeftBack = new (Const.driveLeftBackPort);
+
+    liftMotor = new (Const.liftMotorPort);
+
+    rollerMotor = new (Const.rollerMotorPort);
+
+    climbMotor = new (Const.climbMotorPort);
+
+    //SpeedControllerGroup
+    rightDriveGroup = new SpeedControllerGroup(Const.driveRightFront, Const.driveRightBack);
+    leftDriveGroup = new SpeedControllerGroup(Const.driveLeftFront, Const.driveLeftBack);
+
+    //Encoder,Gyro
+    rightDriveEncoder = new Enocoder(Const.rightDriveEncoderAPort, Const.rightDriveEncoderBPort);
+    leftDriveEncoder = new Enocder(Cosnt.leftDriveEncoderAPort, Const.leftDriveEncoderBPort);
+    driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
+
+    liftEncoder = new Encoder(Const.liftEncoderPort);
+
+    gyro = new ADXRS450_Gyro();
+
+    //Solenoid
+    armSolenoid = new Solenoid(Const.armSolenoidPort);
+    barSolenoid = new Solenoid(Const.barSolenoidPort);
+
+    frontClimbSolenoid = new Solenoid(Const.frontClimbSolenoidPort);
+    backClimbSolenoid = new Solenoid(Const.backClimbSolenoidPort);
+
+    //PIDController
+    drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
+    lift = new Lift(liftMotor, liftEncoder);
+
+    //Grabber
+    grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
+
+    //Sensor
+    rightFrontSensor = new AnalogInput(Const.rightFrontSensorPort);
+    rightBackSensor = new AnalogInput(Const.rightBackSensorPort);
+    leftFrontSensor = new AnalogInput(Const.leftFrontSensor);
+    leftBackSensor = new AnalogInput(Const.leftBackSensor);
+
+    //Camera
+    camera = camera.getInstance();
+    camera.startAutomaticCapture();
+
+    //NetworkTable
+    networkTable = networkTable.getSubTable(Const.lineFindNetworkTable);
+    
+  }
+  
+@Override
+public void autonomousInit() {
+   armSolenoid.set(true);//しまってあるアームを展開する
+}
+
+@Override
+public void autonomousPeriodic() {
+}
+
+@Override
+public void teleopInit() {
+  drive.PIDReset();
+  lift.PIDReset();
+}
+  
+@Override
+public void teleopPeriodic() {
+  /*Init
+   * これからコマンドやコントローラーで変数の値を変えてから代入する。
+   * 操作しないときは出力を出したくないため、最初に出力を出さない状態で初期化する。
    */
-  @Override
-  public void testPeriodic() {
+    //Drive
+    driveXValue = 0;
+    driveYValue = 0;
+    is_drivePIDOn = false;
+    is_lineTraceOn = false;
+
+    //Lift
+    liftValue = 0;
+    is_liftPIDOn = false;
+
+    //Grabber
+    whetherHoldCargo = false;
+    whetherReleaseCargo = false;
+     //パネルは押したら変わる制なので初期化はいらない
+   
+    //Climb
+    is_climbSolenoidOn = false;
+    climbMotorValue = 0;
+  
+    //Commands
+    is_commandInput = true;//入力がなかったらfalseにする。
+
+
+  /*Command*
+   * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
+   */
+    command = getCommand();//コマンドを判別
+
+    switch(command){
+    //Drive
+      case closeToLine:
+        distanceToLine = getDistanceToLine(displayPosition);
+        driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
+        driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
+
+      case lineTrace:
+
+
+    /*Lift
+     *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
+     *  モーターの値を制御するならliftValueに代入
+     */
+      case moveToShipCargoHeight:
+        liftSetpoint = Const.shipCargoHeight;
+        is_liftPIDOn = true;
+        break;
+
+      case moveToRocketCargo_1Height:
+        liftSetpoint = Const.rocketCargo_1Height;
+        is_liftPIDOn = true;
+        break;
+
+      case moveToRocketCargo_2Height:
+        liftSetpoint = Const.rocketCargo_2Height;
+        is_liftPIDOn = true;
+        break;
+
+      case moveToPanel_1Height:
+        liftSetpoint = Const.panel_1Height;
+        is_liftPIDOn = true;
+        break;
+
+      case moveToPanel_2Height:
+        liftSetpoint = Const.panel_2Height;
+        is_liftPIDOn = true;
+        break;
+
+      case keepLiftHeight:
+        liftValue = Const.keepLiftHeightSpeed;
+        break;
+
+    /*Arm
+     * ローラーやメカナムを回してカーゴを回収したり射出したりする
+     * 棒を開いたり閉じたりしてパネルを保持したり開放したりする
+     */
+     
+      case holdCargo:
+        whetherHoldCargo = true;
+        break;
+
+      case releaseCargo:
+        whetherReleaseCargo = true;
+        break;
+
+      case changeBarState:
+        whetherHoldPanel = !whetherHoldPanel;//ボタンを押したら状態が変わる
+        break;
+
+    /*Climb
+     * Climbの流れ
+     * 　1.リフトを上げる。
+     * 　2.ソレノイドでストッパーを出す。
+     *   3.リフトを下げる。(ここで車体が持ち上がる)
+     *   4.モーターを回して前に進む
+     */
+
+      //1
+      case cliimbMoveToHab_2Height:
+        liftSetpoint = Const.hab_2Height;
+        is_liftPIDOn = true;
+        break;
+
+      case climbMoveToHab_3Height:
+        liftSetpoint = Const.hab_3Height;
+        is_liftPIDOn = true;
+        break;
+
+      //2
+      case climbStopperOn:
+        is_climbSolenoidOn = true;
+        break;
+
+      //3
+      case climbLiftDown:
+        liftValue = -1.0;
+        break;
+
+      //4
+      case climbAdvance:
+        driveXValue = ;
+        climbMotorValue = 1.0;
+        break;
+
+
+
+    //NoCommand
+      case noCommand:
+      default:
+      is_commandInput = false;
+    }     
+  
+    
+
+  if(!is_commandInput){
+  /*Controller
+   * コマンドがなかった時にコントローラーから値を受け取り代入する。
+   */
+    driveXValue = deadbandProcessing(joystick.getX());
+    driveYValue = deadbandProcessing(joystick.getY());
+
+    liftValue = deadbandProcessing(joystick.getThrottle());
+    
+  }
+
+
+  /*Substitute
+   *  コマンドやコントローラーによって変えられた変数を代入する。
+   */
+    if(is_lineTraceOn){
+      drive.setLineTraceSetpoint();
+      drive.lineTracePIDEnable();
+    }else if(is_drivePIDOn){
+      drive.setSetpoint(driveStraightSetpoint, driveTurnSetpoint);//PID制御
+      drive.PIDEnable();
+    }else{
+      drive.PIDDisable();
+      drive.arcadeDrive(driveXValue, driveYValue);//普通のモーター制御
+    }
+
+
+    if(is_liftPIDOn){
+      lift.setSetpoint(liftSetpoint);//PID制御
+      lift.PIDEnable();
+    }else{
+      lift.PIDDisable();
+      lift.setSpeed(liftValue);//普通のモーター制御
+    }
+
+      
+    if(whetherHoldCargo){
+      grabber.holdCargo();//カーゴを回収
+    }else{
+      grabber.stopRoller();//ローラーを止める
+    }
+
+    if(whetherReleaseCargo){
+      grabber.releaseCargo();//カーゴ射出
+    }else{
+      grabber.stopRoller();//ローラーを止める
+    }
+      
+    if(whetherHoldPanel){
+      grabber.holdPanel();//パネルをつかむ
+    }else{
+      grabber.releasePanel();//パネルを離す
+    }
+  
+    frontClimbSolenoid.set(is_climbSolenoidOn);//前のベアリング付き爪を出す
+    backClimbSolenoid.set(is_climbSolenoidOn);//後ろのモーター付き爪を出す
+    climbMotor.set(climbMotorValue);//後ろのモーターを動かす
   }
 }
