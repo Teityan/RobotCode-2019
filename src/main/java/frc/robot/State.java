@@ -4,13 +4,22 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class State {
 
-    public enum GrabberState {
+    public enum DriveState {
+        kManual,
+        kLineTrace,
+        kCloseToLine
+    }
 
+    public enum CargoState {
+        kHold,
+        kRelease,
+        kDoNothing
     }
 
     // Drive
-    public double driveXSpeed, driveYSpeed;  // コントローラー制御の値
-    public double driveStraightSetpoint, driveTurnSetpoint; // PID制御の目標値
+    public DriveState driveState;
+    public double driveStraightSpeed, driveRotateSpeed;
+    public double driveStraightSetpoint, driveRotateSetpoint; // PID制御の目標値
     public boolean is_drivePIDOn;  // PID制御するかどうか
 
     public boolean is_lineTraceOn;  // ライントレースするかどうか
@@ -21,23 +30,23 @@ public class State {
     public boolean is_liftPIDOn;    // PID制御するかどうか
 
     // Grabber
-    public boolean whetherHoldCargo;    // カーゴを回収するかどうか
-    public boolean whetherReleaseCargo; // カーゴを射出するかどうか
-    public boolean whetherHoldPanel;    // パネルを保持するかどうか
+    public CargoState cargoState;
+    public boolean is_toHoldPanel;    // パネルを保持するかどうか
 
     // Climb
-    public boolean is_climbSolenoidOn;  // ストッパーを出すかどうか
+    public boolean is_lockClimb;  // ストッパーを出すかどうか
     public double climbMotorSpeed;  // クライムの時の後輪のモーターの値
-  
-    // Commands
-    public boolean is_noCommand;    // コマンドが入力されたかどうか
-    public Const.Command command = Const.Command.noCommand;
+
+    public State() {
+        stateInit()
+    }
 
     public void stateInit(){
 
         // Drive
-        driveXSpeed = 0;
-        driveYSpeed = 0;
+        driveState = DriveState.kManual;
+        driveStraightSpeed = 0;
+        driveRotateSpeed = 0;
         is_drivePIDOn = false;
         is_lineTraceOn = false;
 
@@ -46,20 +55,16 @@ public class State {
         is_liftPIDOn = false;
 
         // Grabber
-        whetherHoldCargo = false;
-        whetherReleaseCargo = false;
-        // パネルは押したら変わる制なので初期化はいらない
+        cargoState = CargoState.kDoNothing;
+        is_toHoldPanel = false;
    
         // Climb
-        is_climbSolenoidOn = false;
+        is_lockClimb = false;
         climbMotorSpeed = 0;
-  
-        // Commands
-        is_noCommand = true;// 入力がなかったらfalseにする。
     }
 
     public void printVariables(){
-        SmartDashboard.putNumber("driveXSpeed",driveXSpeed);
+        SmartDashboard.putNumber("driveXSpeed", driveXSpeed);
     }
 
 }
