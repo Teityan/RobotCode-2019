@@ -76,6 +76,7 @@ public class Lift {
 	 * ToDo
 	 */
 	public void applyState(State state) {
+        //PIDが有効か調べる
         if(state.is_liftPIDOn){
             this.setSetpoint(state.liftSetpoint);
             this.enablePID();
