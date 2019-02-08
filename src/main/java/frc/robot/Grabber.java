@@ -33,15 +33,36 @@ public class Grabber {
 	 */
 	public void applyState(State state) {
 
+        switch(state.cargoState){
+            case kHold:
+                holdCargo();
+                break;
+            
+            case kRelease:
+                releaseCargo();
+                break;
+
+            case kDoNothing:
+                stopRoller();
+                break;
+            
+            default:
+                break;
+        }
+        if(state.is_toHoldPanel){
+           holdPanel();    // パネルをつかむ
+        }else{
+           releasePanel();    // パネルを離す
+        }
     }
     
     public void holdCargo(){
-        rollerMotor.set(1.0);//設置によっては±変わる
+        rollerMotor.set(1.0);    //設置によっては±変わる
         is_RollerMoving = true;
     }
 
     public void releaseCargo(){
-        rollerMotor.set(-1.0);//設置によっては変わる
+        rollerMotor.set(-1.0);    //設置によっては変わる
         is_RollerMoving = true;
     }
 
@@ -55,19 +76,19 @@ public class Grabber {
     }
 
     public void holdPanel(){
-        barSolenoid.set(true);//ソレノイドのつけ方によりT/Fは変わる
+        barSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
     public void releasePanel(){
-        barSolenoid.set(false);//ソレノイドのつけ方によりT/Fは変わる
+        barSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
     public void holdArm(){
-        armSolenoid.set(true);//ソレノイドのつけ方によりT/Fは変わる
+        armSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
     public void releaseArm(){
-        armSolenoid.set(false);//ソレノイドのつけ方によりT/Fは変わる
+        armSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
     /*

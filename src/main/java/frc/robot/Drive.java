@@ -45,8 +45,30 @@ public class Drive extends DifferentialDrive{
 	 */
 	public void applyState(State state) {
 
+		switch(state.driveState){
+			case kManual:
+				PIDDisable();
+				setSpeed(state.driveStraightSpeed, state.driveRotateSpeed);
+				break;
+
+			case kLineTrace:
+				//startLineTrace();
+				//lineTracePIDEnable();
+				break;
+
+			case kCloseToLine:
+				setSetpoint(state.driveStraightSetpoint, state.driveRotateSetpoint);// PID制御
+				PIDEnable();
+				break;
+			
+			default:
+				break;
+		}
 	}
 
+	public void setSpeed(double straightSpeed,double rotateSpeed){
+		arcadeDrive(straightSpeed, rotateSpeed);
+	}
 	
 
 	public void setRelativeStraightSetpoint(double setpoint) {
@@ -88,9 +110,11 @@ public class Drive extends DifferentialDrive{
 	public void PIDDisable() {
 		if (straightController.isEnabled()) {
 			straightController.disable();
+			straightController.reset();
 		}
 		if (turnController.isEnabled()) {
 			turnController.disable();
+			turnController.reset();
 		}
 	}
 
@@ -98,10 +122,6 @@ public class Drive extends DifferentialDrive{
 		return straightController.isEnabled() && turnController.isEnabled();
 	}
 
-	public void PIDReset(){
-		straightController.reset();
-		turnController.reset();
-	}
 
 	
 
@@ -130,7 +150,7 @@ public class Drive extends DifferentialDrive{
 			straightOutput = LimitAcceleraton(preStraightOutput, straightOutput);
 			rotateOutput = LimitAcceleraton(preRotateOutput, rotateOutput);
 
-			arcadeDrive(-straightOutput, rotateOutput);
+			setSpeed(-straightOutput, rotateOutput);
 
 			preStraightOutput = straightOutput;
 			preRotateOutput = rotateOutput;
