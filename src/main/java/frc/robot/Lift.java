@@ -65,7 +65,7 @@ public class Lift {
         }
     }
 
-    //コンストラクター
+    // コンストラクター
     Lift(Talon liftMotor, Encoder encoder){
         this.encoder = encoder;
         this.liftMotor = liftMotor;
@@ -76,7 +76,7 @@ public class Lift {
 	 * ToDo
 	 */
 	public void applyState(State state) {
-        //PIDが有効か調べる
+        // PIDが有効か調べる
         if(state.is_liftPIDOn){
             this.setSetpoint(state.liftSetpoint);
             this.enablePID();
@@ -87,12 +87,12 @@ public class Lift {
 
 	}
 
-    //モーター
+    // モーター
     public void setSpeed(double speed) {
         liftMotor.set(speed);
     }
 
-    //エンコーダー
+    // エンコーダー
     public double getHeight() {
         double height = encoder.getDistance();
         return height;
@@ -103,7 +103,7 @@ public class Lift {
         return speed;
     }
 
-    //PID
+    // PID
     public void enablePID(){
         pid.enable();
     }
