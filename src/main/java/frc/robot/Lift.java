@@ -76,6 +76,13 @@ public class Lift {
 	 * ToDo
 	 */
 	public void applyState(State state) {
+        if(state.is_liftPIDOn){
+            this.setSetpoint(state.liftSetpoint);
+            this.enablePID();
+        }else{
+            this.disablePID();
+            this.setSpeed(state.liftSpeed);
+        }
 
 	}
 
