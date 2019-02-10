@@ -10,10 +10,12 @@ public class Const {
 	public static final int OperateControllerPort = 1;
 	
 	// DriveBaseMotors
-	public static final int DriveRightFrontPort = 0;
-	public static final int DriveRightBackPort = 0;
-	public static final int DriveLeftFrontPort = 0;
-	public static final int DriveLeftBackPort = 0;
+	public static final int DriveRightPort = 1;
+	public static final int DriveLeftPort = 0;
+	//public static final int DriveRightFrontPort = 1;
+	//public static final int DriveLeftFrontPort = 0;
+	//public static final int DriveRightBackPort = 1;
+	//public static final int DriveLeftBackPort = 0;
 	
 	// LiftMotors
 	public static final int LiftMotorPort = 0;
@@ -31,13 +33,13 @@ public class Const {
 	
 	// DriveBaseEncoders
 	public static final int RightDriveEncoderAPort = 0;
-	public static final int RightDriveEncoderBPort = 0;
-	public static final int LeftDriveEncoderAPort = 0;
-	public static final int LeftDriveEncoderBPort = 0;
+	public static final int RightDriveEncoderBPort = 1;
+	public static final int LeftDriveEncoderAPort = 2;
+	public static final int LeftDriveEncoderBPort =3;
 
 	// LiftEncoders
-	public static final int LiftEncoderAPort = 0;
-	public static final int LiftEncoderBPort = 0;
+	public static final int LiftEncoderAPort = 4;
+	public static final int LiftEncoderBPort = 5;
 
 	// Senosors for line trace
 	public static final int RightFrontSensorPort = 0;

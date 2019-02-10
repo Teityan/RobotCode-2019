@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
     private State state;
@@ -28,13 +29,14 @@ public class Robot extends TimedRobot {
     private XboxController driveController, operateController;
 
     // Motors
-    private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
+    //private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
+    private Spark driveLeft, driveRight;
     private Talon liftMotor;
     private Talon rollerMotor;
     private Talon climbMotor;
 
     // SpeedControllerGroup
-    private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
+    //private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
 
     // Encoder, Gyro
     private Encoder rightDriveEncoder, leftDriveEncoder;
@@ -118,10 +120,12 @@ public class Robot extends TimedRobot {
 
 
         // Motors
-        driveRightFront  = new Spark(Const.DriveRightFrontPort);
-        driveRightBack = new Spark(Const.DriveRightBackPort);
-        driveLeftFront = new Spark(Const.DriveLeftFrontPort);
-        driveLeftBack = new Spark(Const.DriveLeftBackPort);
+        driveRight = new Spark(Const.DriveRightPort);
+        driveLeft = new Spark(Const.DriveLeftPort);
+        //driveRightFront  = new Spark(Const.DriveRightFrontPort);
+        //driveRightBack = new Spark(Const.DriveRightBackPort);
+        //driveLeftFront = new Spark(Const.DriveLeftFrontPort);
+        //driveLeftBack = new Spark(Const.DriveLeftBackPort);
 
         liftMotor = new Talon(Const.LiftMotorPort);
 
@@ -130,8 +134,8 @@ public class Robot extends TimedRobot {
         climbMotor = new Talon(Const.ClimbMotorPort);
 
         // SpeedControllerGroup
-        rightDriveGroup = new SpeedControllerGroup(driveRightFront, driveRightBack);
-        leftDriveGroup = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
+        // rightDriveGroup = new SpeedControllerGroup(driveRightFront, driveRightBack);
+        // leftDriveGroup = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
 
         // Encoder,Gyro
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
@@ -150,7 +154,8 @@ public class Robot extends TimedRobot {
         backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
 
         // Submodules
-        drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
+        drive = new Drive(driveLeft, driveRight, driveEncoder, gyro);
+        // drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
         lift = new Lift(liftMotor, liftEncoder);
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
 
@@ -205,68 +210,68 @@ public class Robot extends TimedRobot {
         /*Command*
          * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
          */
-//        state.command = getCommand();// コマンドを判別
+//   
 //
-//        switch(state.command) {
 //        // Drive
-//        case closeToLine:
+//        if(operateController. && operateController.){ 
 //            distanceToLine = getLinePosition(displayPosition);
 //            state.driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
 //            state.driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
-//            break;
+//        }
 //
-//        case lineTrace:
-//            break;
+//        if(operateController. && operateController.){ 
+//                  //lineTrace()
+//        }
 //
 //          /*Lift
 //           *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
 //           *  モーターの値を制御するならliftSpeedに代入
 //           */
-//          case moveToShipCargoHeight:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.shipCargoHeight;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case moveToRocketCargo_1Height:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.rocketCargo_1Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case moveToRocketCargo_2Height:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.rocketCargo_2Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case moveToPanel_1Height:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.panel_1Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case moveToPanel_2Height:
+//          if(operateController. && operateController.){
 //            state.liftSetpoint = Const.panel_2Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case keepLiftHeight:
+//          if(operateController. && operateController.){ 
 //            state.liftSpeed = Const.keepLiftHeightSpeed;
-//            break;
+//          }
 //
 //        /*Arm
 //         * ローラーやメカナムを回してカーゴを回収したり射出したりする
 //         * 棒を開いたり閉じたりしてパネルを保持したり開放したりする
 //         */
 //         
-//          case holdCargo:
-//            state.whetherHoldCargo = true;
-//            break;
+//          if(operateController. && operateController.){ 
+//            state.cargoState = kHold;
+//          }
 //
-//          case releaseCargo:
-//            state.whetherReleaseCargo = true;
-//            break;
+//          if(operateController. && operateController.){ 
+//            state.cargoState = kRelease;
+//          }
 //
-//          case changeBarState:
-//            state.whetherHoldPanel = !state.whetherHoldPanel;// ボタンを押したら状態が変わる
-//            break;
+//          if(operateController. && operateController.){ 
+//            state.is_toHoldPanel = true;
+//          }
 //
 //        /*Climb
 //         * Climbの流れ
@@ -277,39 +282,39 @@ public class Robot extends TimedRobot {
 //         */
 //
 //          // 1
-//          case climbMoveToHab_2Height:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.hab_2Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
-//          case climbMoveToHab_3Height:
+//          if(operateController. && operateController.){ 
 //            state.liftSetpoint = Const.hab_3Height;
 //            state.is_liftPIDOn = true;
-//            break;
+//          }
 //
 //          // 2
-//          case climbStopperOn:
-//            state.is_climbSolenoidOn = true;   //ここはClimbの関数使う
-//            break;
+//          if(operateController. && operateController.){ 
+//            climb.climbStopperSet(true);  
+//          }
 //
 //          // 3
-//          case climbLiftDown:
+//          if(operateController. && operateController.){ 
 //            state.liftSpeed = -1.0;    
-//            break;
+//          }
 //
 //          // 4
-//          case climbAdvance:
-//            state.driveXSpeed = 0;
-//            state.climbMotorSpeed = 1.0;    ////ここはClimbの関数使う
-//            break;
+//          if(operateController. && operateController.){
+//            state.driveXSpeed = driveController.getY();
+//            climb.climbAdvance(driveController.getY());   
+//          }
 //
 //
 //
 //        // NoCommand
-//          case noCommand:
+//          if(operateController. && operateController.){ 
 //          default:
 //          state.is_noCommand = false;
-//        }     
+//          }     
       
 
 
