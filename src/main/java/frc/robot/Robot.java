@@ -10,7 +10,6 @@ package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Encoder;
 //import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -55,10 +54,10 @@ public class Robot extends TimedRobot {
 
     // ライントレース用のセンサー　
     // 0～3.3V 白線があると電圧が上がる 
-    private AnalogInput rightFrontSensor, 
-                      rightBackSensor, 
-                      leftFrontSensor, 
-                      leftBackSensor;
+    //private AnalogInput rightFrontSensor, 
+    //                  rightBackSensor, 
+    //                  leftFrontSensor, 
+    //                  leftBackSensor;
 
     // Camera
     private CameraServer camera;
@@ -69,8 +68,8 @@ public class Robot extends TimedRobot {
 
     // variables
     // ToDo
-    private double distanceToLine[] = new double[2], 
-                    displayPosition[] = new double[2];
+    //private double distanceToLine[] = new double[2], 
+    //                displayPosition[] = new double[2];
 
     // functions
     private double deadbandProcessing(double value) {
@@ -93,10 +92,10 @@ public class Robot extends TimedRobot {
 
         // double aboveMaxX = maxH * Math.tan(theta_a);
         // double minH = maxH - maxY * Math.cos(Math.PI/2 - (theta_c + theta_a));     
-        double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;    // 縦幅
+        //double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;    // 縦幅
             
         double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(theta_c)*maxH/Math.cos(theta_c) - 2*y*maxH*Math.sin(theta_a)/Math.cos(theta_c));    //余弦定理
-        double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);    // 横幅
+        //double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);    // 横幅
 
         // y方向の距離を求める
         double sinDistanceCamera_Display = y * Math.cos(theta_a) / distanceCamera_Display;    // 正弦定理
@@ -152,10 +151,10 @@ public class Robot extends TimedRobot {
         backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
 
         // Sensor
-        rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
-        rightBackSensor = new AnalogInput(Const.RightBackSensorPort);
-        leftFrontSensor = new AnalogInput(Const.LeftFrontSensorPort);
-        leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
+        //rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
+        //rightBackSensor = new AnalogInput(Const.RightBackSensorPort);
+        //leftFrontSensor = new AnalogInput(Const.LeftFrontSensorPort);
+        //leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
 
         // Camera
         camera = CameraServer.getInstance();
@@ -204,8 +203,8 @@ public class Robot extends TimedRobot {
           state.driveState = State.DriveState.kCloseToLine;
         } else {
           state.driveState = State.DriveState.kManual;
-          state.driveStraightSpeed = driver.getY(Hand.kLeft);
-          state.driveRotateSpeed = driver.getX(Hand.kRight);
+          state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+          state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
         }
 
         /********** Lift ***********/
@@ -231,7 +230,7 @@ public class Robot extends TimedRobot {
           state.liftSetpoint = Const.GroundHeight;
           state.is_liftPIDOn = true;
         } else {
-          state.liftSpeed = operator.getY(Hand.kLeft);
+          state.liftSpeed = deadbandProcessing(operator.getY(Hand.kLeft));
           state.is_liftPIDOn = false;
         }
 
