@@ -21,7 +21,6 @@ public class Grabber {
 
     private boolean is_RollerMoving = false;
 
-
     Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid){
         this.rollerMotor = rollerMotor;
         this.barSolenoid = barSolenoid;
@@ -35,6 +34,7 @@ public class Grabber {
 
         switch(state.cargoState){
             case kHold:
+                releaseArm();
                 holdCargo();
                 break;
             
@@ -44,25 +44,33 @@ public class Grabber {
 
             case kDoNothing:
                 stopRoller();
+                releaseArm();
                 break;
             
             default:
                 break;
         }
+
         if(state.is_toHoldPanel){
            holdPanel();    // パネルをつかむ
         }else{
            releasePanel();    // パネルを離す
         }
+
+        if(state.is_toHoldArm){
+            holdArm();
+        }else{
+            releaseArm();
+        }
     }
     
     public void holdCargo(){
-        rollerMotor.set(1.0);    //設置によっては±変わる
+        rollerMotor.set(0.4);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 
     public void releaseCargo(){
-        rollerMotor.set(-1.0);    //設置によっては変わる
+        rollerMotor.set(-0.4);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 
@@ -71,7 +79,12 @@ public class Grabber {
         is_RollerMoving = false;
     }
 
-    public boolean isRollerMoving(){
+    public void setRollerSpeed(double speed){
+        rollerMotor.set(speed);
+        is_RollerMoving = true;
+    }
+
+    public boolean is_RollerMoving(){
         return is_RollerMoving;
     }
 
@@ -84,12 +97,13 @@ public class Grabber {
     }
 
     public void holdArm(){
-        armSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
+        armSolenoid.set(false);   
     }
 
     public void releaseArm(){
-        armSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
+        armSolenoid.set(true);    
     }
+
 
     /*
     Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid)
@@ -111,9 +125,10 @@ public class Grabber {
     
 
     holdArm();
-        モーターや棒、板をしまう
+        アームをしまう
     releaseArm();
-        モーターや棒、板を出す
+        アームを出す
+        
     */
 
 }

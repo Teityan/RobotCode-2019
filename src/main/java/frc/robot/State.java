@@ -4,13 +4,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class State {
 
-    public enum DriveState {
+    public static enum DriveState {
         kManual,
         kLineTrace,
         kCloseToLine
     }
 
-    public enum CargoState {
+    public static enum CargoState {
         kHold,
         kRelease,
         kDoNothing
@@ -32,6 +32,7 @@ public class State {
     // Grabber
     public CargoState cargoState;
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
+    public boolean is_toHoldArm;
 
     // Climb
     public boolean is_lockClimb;    // ストッパーを出すかどうか
@@ -57,6 +58,7 @@ public class State {
         // Grabber
         cargoState = CargoState.kDoNothing;
         is_toHoldPanel = false;
+        is_toHoldArm = false;
    
         // Climb
         is_lockClimb = false;

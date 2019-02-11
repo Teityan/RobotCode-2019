@@ -15,7 +15,7 @@ public class Climb {
         this.backClimbSolenoid = backClimbSolenoid;
     }
 
-    public void climbAvance(double speed){
+    public void climbAdvance(double speed){
         climbMotor.setSpeed(speed);
     }
 
