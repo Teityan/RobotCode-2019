@@ -40,12 +40,8 @@ public class Drive extends DifferentialDrive{
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
-	/**
-	 * ToDo
-	 */
 	public void applyState(State state) {
-
-		switch(state.driveState){
+		switch(state.driveState) {
 			case kManual:
 				PIDDisable();
 				setSpeed(state.driveStraightSpeed, state.driveRotateSpeed);
@@ -66,7 +62,7 @@ public class Drive extends DifferentialDrive{
 		}
 	}
 
-	public void setSpeed(double straightSpeed,double rotateSpeed){
+	public void setSpeed(double straightSpeed,double rotateSpeed) {
 		arcadeDrive(straightSpeed, rotateSpeed);
 	}
 	
@@ -84,15 +80,15 @@ public class Drive extends DifferentialDrive{
 		turnController.setSetpoint(g_drive.getAngle() + turnSetpoint);
     }
     
-    public void setStraightSetpoint(double straightSetpoint){
+    public void setStraightSetpoint(double straightSetpoint) {
         setSetpoint(straightSetpoint, 0);
     }
 
-    public void setTurnSetpoint(double turnSetpoint){
+    public void setTurnSetpoint(double turnSetpoint) {
         setSetpoint(0, turnSetpoint);
     }
 
-    public void setSetpoint(double straightSetpoint, double turnSetpoint){
+    public void setSetpoint(double straightSetpoint, double turnSetpoint) {
         straightController.setSetpoint(straightSetpoint);
 		turnController.setSetpoint(turnSetpoint);
     }
@@ -121,9 +117,6 @@ public class Drive extends DifferentialDrive{
 	public boolean is_PIDEnabled() {
 		return straightController.isEnabled() && turnController.isEnabled();
 	}
-
-
-	
 
 	public class DrivePIDOutput implements PIDOutput {
 
@@ -156,7 +149,7 @@ public class Drive extends DifferentialDrive{
 			preRotateOutput = rotateOutput;
 		}
 
-		private double LimitAcceleraton(double preOutput, double output ){
+		private double LimitAcceleraton(double preOutput, double output ) {
 			if(preOutput == output) return output;
 			double accelration = (output - preOutput) / Const.PIDPeriod;
 			double Output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;

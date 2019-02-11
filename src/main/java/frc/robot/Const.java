@@ -47,12 +47,17 @@ public class Const {
 	
 	/**
 		Field Dimension	
+		everything in cm
 	 */
+	public static final double RocketFirstCargoHeight = 0;
+	public static final double RocketSecondCargoHeight = 0;
+	public static final double RocketFirstHatchHeight = 0;
+	public static final double RocketSecondHatchHeight = 0;
 	public static final double ShipCargoHeight = 0;
-	public static final double RocketCargoFirstHeight = 0;
-	public static final double RocketCargoSecondHeight = 0;
-	public static final double FirstPanelHeight = 0;
-	public static final double SecondPanelHeight = 0;
+	public static final double ShipHatchHeight = 0;
+	public static final double GroundHeight = 0;
+	//public static final double FirstPanelHeight = 0;
+	//public static final double SecondPanelHeight = 0;
 	//public static final double HabSecondHeight;
 	//public static final double HabThirdHeight;
 

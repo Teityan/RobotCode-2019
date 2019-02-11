@@ -22,7 +22,7 @@ public class Grabber {
     private boolean is_RollerMoving = false;
 
 
-    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid){
+    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
         this.rollerMotor = rollerMotor;
         this.barSolenoid = barSolenoid;
         this.armSolenoid = armSolenoid;
@@ -32,8 +32,7 @@ public class Grabber {
 	 * ToDo
 	 */
 	public void applyState(State state) {
-
-        switch(state.cargoState){
+        switch (state.cargoState) {
             case kHold:
                 holdCargo();
                 break;
@@ -49,45 +48,46 @@ public class Grabber {
             default:
                 break;
         }
-        if(state.is_toHoldPanel){
+
+        if (state.is_toHoldPanel) {
            holdPanel();    // パネルをつかむ
-        }else{
+        } else {
            releasePanel();    // パネルを離す
         }
     }
     
-    public void holdCargo(){
+    public void holdCargo() {
         rollerMotor.set(1.0);    //設置によっては±変わる
         is_RollerMoving = true;
     }
 
-    public void releaseCargo(){
+    public void releaseCargo() {
         rollerMotor.set(-1.0);    //設置によっては変わる
         is_RollerMoving = true;
     }
 
-    public void stopRoller(){
+    public void stopRoller() {
         rollerMotor.stopMotor();
         is_RollerMoving = false;
     }
 
-    public boolean isRollerMoving(){
+    public boolean isRollerMoving() {
         return is_RollerMoving;
     }
 
-    public void holdPanel(){
+    public void holdPanel() {
         barSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
-    public void releasePanel(){
+    public void releasePanel() {
         barSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
-    public void holdArm(){
+    public void holdArm() {
         armSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
-    public void releaseArm(){
+    public void releaseArm() {
         armSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
     }
 

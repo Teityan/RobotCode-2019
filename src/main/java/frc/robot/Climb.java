@@ -24,4 +24,8 @@ public class Climb {
         backClimbSolenoid.set(on);
     }
 
+    public void applyState(State state) {
+        
+    }
+
 }

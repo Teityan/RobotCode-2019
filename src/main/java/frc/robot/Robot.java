@@ -19,13 +19,14 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 
 public class Robot extends TimedRobot {
     private State state;
 
     // Controller
     //private Joystick joystick;
-    private XboxController driveController, operateController;
+    private XboxController driver, operator;
 
     // Motors
     private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
@@ -50,6 +51,7 @@ public class Robot extends TimedRobot {
     private Drive drive;
     private Lift lift;
     private Grabber grabber;
+    private Climb climb;
 
     // ライントレース用のセンサー　
     // 0～3.3V 白線があると電圧が上がる 
@@ -113,8 +115,8 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         // Controller
         //joystick = new Joystick(Const.JoystickPort);
-        driveController = new XboxController(Const.DriveControllerPort);
-        operateController = new XboxController(Const.OperateControllerPort);
+        driver = new XboxController(Const.DriveControllerPort);
+        driver = new XboxController(Const.OperateControllerPort);
 
 
         // Motors
@@ -149,11 +151,6 @@ public class Robot extends TimedRobot {
         frontClimbSolenoid = new Solenoid(Const.FrontClimbSolenoidPort);
         backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
 
-        // Submodules
-        drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
-        lift = new Lift(liftMotor, liftEncoder);
-        grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
-
         // Sensor
         rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
         rightBackSensor = new AnalogInput(Const.RightBackSensorPort);
@@ -169,6 +166,12 @@ public class Robot extends TimedRobot {
 
         // State
         state = new State();
+
+        // Submodules
+        drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
+        lift = new Lift(liftMotor, liftEncoder);
+        grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
+        climb = new Climb(climbMotor, frontClimbSolenoid, backClimbSolenoid);
     }
   
     @Override
@@ -194,6 +197,59 @@ public class Robot extends TimedRobot {
         /**
          * Joystickやセンサーからの入力を受け取ってstate objectに値を流しこむ
          */
+        /********** Drive ***********/
+        if (driver.getBumper(Hand.kLeft)) {
+          state.driveState = State.DriveState.kLineTrace;
+        } else if (driver.getBumper(Hand.kRight)) {
+          state.driveState = State.DriveState.kCloseToLine;
+        } else {
+          state.driveState = State.DriveState.kManual;
+          state.driveStraightSpeed = driver.getY(Hand.kLeft);
+          state.driveRotateSpeed = driver.getX(Hand.kRight);
+        }
+
+        /********** Lift ***********/
+        if (operator.getBumper(Hand.kLeft) && operator.getYButton()) {
+          state.liftSetpoint = Const.RocketSecondCargoHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getBumper(Hand.kLeft) && operator.getXButton()) {
+          state.liftSetpoint = Const.RocketFirstCargoHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getBumper(Hand.kLeft) && operator.getBButton()) {
+          state.liftSetpoint = Const.ShipCargoHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getYButton()) {
+          state.liftSetpoint = Const.RocketSecondHatchHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getXButton()) {
+          state.liftSetpoint = Const.RocketFirstHatchHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getBButton()) {
+          state.liftSetpoint = Const.ShipHatchHeight;
+          state.is_liftPIDOn = true;
+        } else if (operator.getAButton()) {
+          state.liftSetpoint = Const.GroundHeight;
+          state.is_liftPIDOn = true;
+        } else {
+          state.liftSpeed = operator.getY(Hand.kLeft);
+          state.is_liftPIDOn = false;
+        }
+
+        /*********** Grabber ***********/
+        if (driver.getTriggerAxis(Hand.kLeft) > 0.5) {
+          state.cargoState = State.CargoState.kHold;
+        } else if (driver.getTriggerAxis(Hand.kRight) > 0.5) {
+          state.cargoState = State.CargoState.kRelease;
+        } else {
+          state.cargoState = State.CargoState.kDoNothing;
+        }
+
+        if (driver.getBumper(Hand.kRight)) {
+          state.is_toHoldPanel = true;
+        } else {
+          state.is_toHoldPanel = false;
+        }
+
 
         /**
          * Stateをapplyする
@@ -201,6 +257,7 @@ public class Robot extends TimedRobot {
         drive.applyState(state);
         lift.applyState(state);
         grabber.applyState(state);
+        climb.applyState(state);
 
         /*Command*
          * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。

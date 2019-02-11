@@ -84,7 +84,6 @@ public class Lift {
             this.disablePID();
             this.setSpeed(state.liftSpeed);
         }
-
 	}
 
     // モーター

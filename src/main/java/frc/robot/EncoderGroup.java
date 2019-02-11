@@ -39,11 +39,11 @@ public class EncoderGroup implements PIDSource{
         e_driveB.reset();
     }
     
-        @Override
+    @Override
     public void setPIDSourceType(PIDSourceType pidSource) {
     }
     
-        @Override
+    @Override
     public PIDSourceType getPIDSourceType() { 
         return PIDSourceType.kRate;
     }
