@@ -19,14 +19,14 @@ public class State {
     // Drive
     public DriveState driveState;
     public double driveStraightSpeed, driveRotateSpeed;
-    public double driveStraightSetpoint, driveRotateSetpoint; // PID制御の目標値
-    public boolean is_drivePIDOn;  // PID制御するかどうか
+    public double driveStraightSetpoint, driveRotateSetpoint;    // PID制御の目標値
+    public boolean is_drivePIDOn;    // PID制御するかどうか
 
-    public boolean is_lineTraceOn;  // ライントレースするかどうか
+    public boolean is_lineTraceOn;    // ライントレースするかどうか
 
     // Lift
     public double liftSpeed;    // コントローラー制御の値
-    public double liftSetpoint; // PID制御の目標値
+    public double liftSetpoint;   // PID制御の目標値
     public boolean is_liftPIDOn;    // PID制御するかどうか
 
     // Grabber
@@ -34,8 +34,8 @@ public class State {
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
 
     // Climb
-    public boolean is_lockClimb;  // ストッパーを出すかどうか
-    public double climbMotorSpeed;  // クライムの時の後輪のモーターの値
+    public boolean is_lockClimb;    // ストッパーを出すかどうか
+    public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
 
     public State() {
         stateInit();

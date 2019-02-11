@@ -6,6 +6,8 @@ public class Const {
 	 */
 	// Joystick
 	public static final int JoystickPort = 0;
+	public static final int DriveControllerPort = 0;
+	public static final int OperateControllerPort = 1;
 	
 	// DriveBaseMotors
 	public static final int DriveRightFrontPort = 0;

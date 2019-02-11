@@ -12,20 +12,22 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
+//import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends TimedRobot {
     private State state;
 
     // Controller
-    private Joystick joystick;
+    //private Joystick joystick;
+    private XboxController driveController, operateController;
 
-    //Motors
+    // Motors
     private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
     private Talon liftMotor;
     private Talon rollerMotor;
@@ -78,9 +80,9 @@ public class Robot extends TimedRobot {
      *
      */
     public double[] geLinePosition(double[] displayPosition) {
-        double theta_c = Const.Theta_Camera_rad;
-        double theta_a = Const.Theta_Angle_rad;
-        double maxH = Const.cameraHeight;
+        double theta_c = Const.Theta_Camera_rad;    // カメラ自体の角度
+        double theta_a = Const.Theta_Angle_rad;    // カメラの画角
+        double maxH = Const.cameraHeight;    //カメラの設置された高さ
 
         // xは中央から右向き正  yは下から上向き正
         double x = displayPosition[0];
@@ -89,16 +91,19 @@ public class Robot extends TimedRobot {
 
         // double aboveMaxX = maxH * Math.tan(theta_a);
         // double minH = maxH - maxY * Math.cos(Math.PI/2 - (theta_c + theta_a));     
-        double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;// 縦幅
+        double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;    // 縦幅
             
-        double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(theta_c)*maxH/Math.cos(theta_c) - 2*y*maxH*Math.sin(theta_a)/Math.cos(theta_c));
-        double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);// 横幅
+        double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(theta_c)*maxH/Math.cos(theta_c) - 2*y*maxH*Math.sin(theta_a)/Math.cos(theta_c));    //余弦定理
+        double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);    // 横幅
 
-        double sinDistanceCamera_Display = y * Math.cos(theta_a) / distanceCamera_Display;
-        double angleDisplay_LineOfSight  = Math.PI/2 - theta_a + Math.asin(sinDistanceCamera_Display);
-        double l = y * Math.sin(angleDisplay_LineOfSight) / Math.sin(angleDisplay_LineOfSight + theta_c + theta_a);
+        // y方向の距離を求める
+        double sinDistanceCamera_Display = y * Math.cos(theta_a) / distanceCamera_Display;    // 正弦定理
+        double angleDisplay_LineOfSight  = Math.PI/2 - theta_a + Math.asin(sinDistanceCamera_Display);    // 目線の一番低いところを0とした時の角度
+        double l = y * Math.sin(angleDisplay_LineOfSight) / Math.sin(angleDisplay_LineOfSight + theta_c + theta_a);    // 目線の一番低いところからの距離
         result[1] = maxH * Math.tan(theta_c) + l;
-        double distanceCamera_DisplayZ = distanceCamera_Display * Math.cos(theta_c + angleDisplay_LineOfSight);
+
+        // x方向の距離を求める
+        double distanceCamera_DisplayZ = distanceCamera_Display * Math.cos(theta_c + angleDisplay_LineOfSight);    //yの位置からdisplayとカメラとの距離を求める
         result[0]  = maxH * x / distanceCamera_DisplayZ; 
 
         return result;
@@ -107,7 +112,9 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         // Controller
-        joystick = new Joystick(Const.JoystickPort);
+        //joystick = new Joystick(Const.JoystickPort);
+        driveController = new XboxController(Const.DriveControllerPort);
+        operateController = new XboxController(Const.OperateControllerPort);
 
 
         // Motors
@@ -166,7 +173,7 @@ public class Robot extends TimedRobot {
   
     @Override
     public void autonomousInit() {
-       armSolenoid.set(true);// しまってあるアームを展開する
+       armSolenoid.set(true);    // しまってあるアームを展開する
     }
 
     @Override
@@ -174,8 +181,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        drive.PIDReset();
-        //lift.PIDReset();
     }
   
     @Override
@@ -284,18 +289,18 @@ public class Robot extends TimedRobot {
 //
 //          // 2
 //          case climbStopperOn:
-//            state.is_climbSolenoidOn = true;
+//            state.is_climbSolenoidOn = true;   //ここはClimbの関数使う
 //            break;
 //
 //          // 3
 //          case climbLiftDown:
-//            state.liftSpeed = -1.0;
+//            state.liftSpeed = -1.0;    
 //            break;
 //
 //          // 4
 //          case climbAdvance:
 //            state.driveXSpeed = 0;
-//            state.climbMotorSpeed = 1.0;
+//            state.climbMotorSpeed = 1.0;    ////ここはClimbの関数使う
 //            break;
 //
 //
@@ -306,60 +311,21 @@ public class Robot extends TimedRobot {
 //          state.is_noCommand = false;
 //        }     
       
-        
-
 
 
   /*Substitute
    *  コマンドやコントローラーによって変えられた変数を代入する。
    */
    /*
-    drive.applyState(state);
-    //lift.applyState(state);
-    grabber.applyState(state);
-
-    if(state.is_lineTraceOn){
-      //drive.setLineTraceSetpoint();
-      //drive.lineTracePIDEnable();
-    }else if(state.is_drivePIDOn){
-      drive.setSetpoint(state.driveStraightSetpoint, state.driveTurnSetpoint);// PID制御
-      drive.PIDEnable();
-    }else{
-      drive.PIDDisable();
-      drive.arcadeDrive(driveXSpeed, driveYSpeed);// 普通のモーター制御
-    }
-
 
     if(is_liftPIDOn){
-      lift.setSetpoint(liftSetpoint);// PID制御
+      lift.setSetpoint(liftSetpoint);    // PID制御
       lift.PIDEnable();
     }else{
       lift.PIDDisable();
-      lift.setSpeed(liftSpeed);// 普通のモーター制御
+      lift.setSpeed(liftSpeed);    // 普通のモーター制御
     }
 
-      
-    if(whetherHoldCargo){
-      grabber.holdCargo();// カーゴを回収
-    }else{
-      grabber.stopRoller();// ローラーを止める
-    }
-
-    if(whetherReleaseCargo){
-      grabber.releaseCargo();// カーゴ射出
-    }else{
-      grabber.stopRoller();// ローラーを止める
-    }
-      
-    if(whetherHoldPanel){
-      grabber.holdPanel();// パネルをつかむ
-    }else{
-      grabber.releasePanel();// パネルを離す
-    }
-  
-    frontClimbSolenoid.set(is_climbSolenoidOn);// 前のベアリング付き爪を出す
-    backClimbSolenoid.set(is_climbSolenoidOn);// 後ろのモーター付き爪を出す
-    climbMotor.set(climbMotorSpeed);// 後ろのモーターを動かす
     */
   }
 }
