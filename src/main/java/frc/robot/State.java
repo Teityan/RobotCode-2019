@@ -16,12 +16,18 @@ public class State {
         kDoNothing
     }
 
+    public enum ClimbSequence {
+        kDoNothing,
+        kLiftUp,
+        kLocking,
+        kLiftDown
+    }
+
     // Drive
     public DriveState driveState;
     public double driveStraightSpeed, driveRotateSpeed;
     public double driveStraightSetpoint, driveRotateSetpoint;    // PID制御の目標値
     public boolean is_drivePIDOn;    // PID制御するかどうか
-
     public boolean is_lineTraceOn;    // ライントレースするかどうか
 
     // Lift
@@ -32,8 +38,13 @@ public class State {
     // Grabber
     public CargoState cargoState;
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
+    public boolean is_toRetractArm;
 
     // Climb
+    public ClimbSequence climbSequence;
+    public boolean is_autoClimbOn;
+    public boolean is_lockFrontClimb;
+    public boolean is_lockBackClimb;
     public boolean is_lockClimb;    // ストッパーを出すかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
 
@@ -41,7 +52,7 @@ public class State {
         stateInit();
     }
 
-    public void stateInit(){
+    public void stateInit() {
 
         // Drive
         driveState = DriveState.kManual;
@@ -57,8 +68,11 @@ public class State {
         // Grabber
         cargoState = CargoState.kDoNothing;
         is_toHoldPanel = false;
+        is_toRetractArm = false;
    
         // Climb
+        climbSequence = ClimbSequence.kDoNothing;
+        is_autoClimbOn = false;
         is_lockClimb = false;
         climbMotorSpeed = 0;
     }
@@ -66,5 +80,4 @@ public class State {
     public void printVariables(){
         SmartDashboard.putNumber("driveStraightSpeed", driveStraightSpeed);
     }
-
 }

@@ -15,7 +15,7 @@ public class Climb {
         this.backClimbSolenoid = backClimbSolenoid;
     }
 
-    public void climbAvance(double speed){
+    public void climbAdvance(double speed){
         climbMotor.setSpeed(speed);
     }
 
@@ -25,7 +25,21 @@ public class Climb {
     }
 
     public void applyState(State state) {
-        
+        if (state.is_autoClimbOn) {
+            switch (state.climbSequence) {
+            case kDoNothing:
+                break;
+            case kLiftUp:
+                break;
+            case kLocking:
+                break;
+            case kLiftDown:
+                break;
+            }
+        } else {
+            climbMotor.set(state.climbMotorSpeed);
+            frontClimbSolenoid.set(state.is_lockClimb);
+        }
     }
 
 }

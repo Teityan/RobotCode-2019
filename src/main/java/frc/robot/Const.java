@@ -10,34 +10,36 @@ public class Const {
 	public static final int OperateControllerPort = 1;
 	
 	// DriveBaseMotors
-	public static final int DriveRightFrontPort = 0;
-	public static final int DriveRightBackPort = 0;
-	public static final int DriveLeftFrontPort = 0;
-	public static final int DriveLeftBackPort = 0;
+	public static final int DriveRightPort = 1;
+	public static final int DriveLeftPort = 0;
+	//public static final int DriveRightFrontPort = 1;
+	//public static final int DriveLeftFrontPort = 0;
+	//public static final int DriveRightBackPort = 1;
+	//public static final int DriveLeftBackPort = 0;
 	
 	// LiftMotors
-	public static final int LiftMotorPort = 0;
+	public static final int LiftMotorPort = 2;
 	public static final double KeepLiftHeightSpeed = 0;
 
 	// ArmSolenoids & Motors
 	public static final int ArmSolenoidPort = 0;
-	public static final int BarSolenoidPort = 0;
-	public static final int RollerMotorPort = 0;
+	public static final int BarSolenoidPort = 1;
+	public static final int RollerMotorPort = 3;
 
 	// Solenoids & Motors for climbing
-	public static final int FrontClimbSolenoidPort = 0;
-	public static final int BackClimbSolenoidPort = 0;
-	public static final int ClimbMotorPort = 0;
+	public static final int FrontClimbSolenoidPort = 2;
+	public static final int BackClimbSolenoidPort = 3;
+	public static final int ClimbMotorPort = 4;
 	
 	// DriveBaseEncoders
 	public static final int RightDriveEncoderAPort = 0;
-	public static final int RightDriveEncoderBPort = 0;
-	public static final int LeftDriveEncoderAPort = 0;
-	public static final int LeftDriveEncoderBPort = 0;
+	public static final int RightDriveEncoderBPort = 1;
+	public static final int LeftDriveEncoderAPort = 2;
+	public static final int LeftDriveEncoderBPort =3;
 
 	// LiftEncoders
-	public static final int LiftEncoderAPort = 0;
-	public static final int LiftEncoderBPort = 0;
+	public static final int LiftEncoderAPort = 4;
+	public static final int LiftEncoderBPort = 5;
 
 	// Senosors for line trace
 	public static final int RightFrontSensorPort = 0;
@@ -55,6 +57,8 @@ public class Const {
 	public static final double RocketSecondHatchHeight = 0;
 	public static final double ShipCargoHeight = 0;
 	public static final double ShipHatchHeight = 0;
+	public static final double HabSecondHeight = 0;
+	public static final double HabThirdHeight = 0;
 	public static final double GroundHeight = 0;
 	//public static final double FirstPanelHeight = 0;
 	//public static final double SecondPanelHeight = 0;
@@ -64,7 +68,7 @@ public class Const {
 	/**
 		Robot Dimension
 	 */
-	public static final double DriveEncoderDistancePerPulse = 0;
+	public static final double DriveEncoderDistancePerPulse = 7.7 * Math.PI / 10.71;
     public static final double LiftMinHeight = 0 ;
     public static final double LiftEncoderDistancePerPulse = 0;
 	
@@ -101,6 +105,9 @@ public class Const {
 	// Constants for limitting acceleration
 	public static final double PIDPeriod = 0.05;
 	public static final double maxAcceleration = 0.5;
+
+	// Constant for sleep after Solenid moving
+	public static final int SolenoidSleepTime = 100;
 
 	//Constants for getting distance to the line
 	public static final double Theta_Camera_rad = Math.toRadians(0);

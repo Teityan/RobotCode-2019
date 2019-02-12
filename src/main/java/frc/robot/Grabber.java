@@ -34,6 +34,7 @@ public class Grabber {
 	public void applyState(State state) {
         switch (state.cargoState) {
             case kHold:
+                releaseArm();
                 holdCargo();
                 break;
             
@@ -43,6 +44,7 @@ public class Grabber {
 
             case kDoNothing:
                 stopRoller();
+                releaseArm();
                 break;
             
             default:
@@ -54,15 +56,21 @@ public class Grabber {
         } else {
            releasePanel();    // パネルを離す
         }
+
+        if (state.is_toRetractArm) {
+            retractArm();
+        } else {
+            releaseArm();
+        }
     }
     
     public void holdCargo() {
-        rollerMotor.set(1.0);    //設置によっては±変わる
+        rollerMotor.set(0.4);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 
     public void releaseCargo() {
-        rollerMotor.set(-1.0);    //設置によっては変わる
+        rollerMotor.set(-0.4);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 
@@ -71,7 +79,12 @@ public class Grabber {
         is_RollerMoving = false;
     }
 
-    public boolean isRollerMoving() {
+    public void setRollerSpeed(double speed) {
+        rollerMotor.set(speed);
+        is_RollerMoving = true;
+    }
+
+    public boolean is_RollerMoving() {
         return is_RollerMoving;
     }
 
@@ -83,13 +96,14 @@ public class Grabber {
         barSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
     }
 
-    public void holdArm() {
-        armSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
+    public void retractArm() {
+        armSolenoid.set(false);   
     }
 
     public void releaseArm() {
-        armSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
+        armSolenoid.set(true);    
     }
+
 
     /*
     Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid)
@@ -111,9 +125,10 @@ public class Grabber {
     
 
     holdArm();
-        モーターや棒、板をしまう
+        アームをしまう
     releaseArm();
-        モーターや棒、板を出す
+        アームを出す
+        
     */
 
 }

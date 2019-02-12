@@ -11,10 +11,8 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
-//import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
@@ -28,13 +26,10 @@ public class Robot extends TimedRobot {
     private XboxController driver, operator;
 
     // Motors
-    private Spark driveRightFront, driveRightBack, driveLeftFront, driveLeftBack;
+    private Spark driveLeft, driveRight;
     private Talon liftMotor;
     private Talon rollerMotor;
     private Talon climbMotor;
-
-    // SpeedControllerGroup
-    private SpeedControllerGroup rightDriveGroup, leftDriveGroup;
 
     // Encoder, Gyro
     private Encoder rightDriveEncoder, leftDriveEncoder;
@@ -76,7 +71,7 @@ public class Robot extends TimedRobot {
         return Math.abs(value) > Const.Deadband ? value : 0 ;
     }
 
-    /**
+    /*
      * ToDo: レファクタリング
      *
      */
@@ -85,17 +80,20 @@ public class Robot extends TimedRobot {
         double theta_a = Const.Theta_Angle_rad;    // カメラの画角
         double maxH = Const.cameraHeight;    //カメラの設置された高さ
 
+
         // xは中央から右向き正  yは下から上向き正
         double x = displayPosition[0];
         double y = displayPosition[1];
         double result[] = new double[2]; 
 
+        double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(theta_c)*maxH/Math.cos(theta_c) - 2*y*maxH*Math.sin(theta_a)/Math.cos(theta_c));    //余弦定理
+
+        double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;    // 縦幅
+        double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);    // 横幅
+
         // double aboveMaxX = maxH * Math.tan(theta_a);
         // double minH = maxH - maxY * Math.cos(Math.PI/2 - (theta_c + theta_a));     
-        //double maxY = maxH / Math.cos(theta_c) * Math.sin(theta_a) *2;    // 縦幅
-            
-        double distanceCamera_Display = Math.sqrt(y*y + maxH/Math.cos(theta_c)*maxH/Math.cos(theta_c) - 2*y*maxH*Math.sin(theta_a)/Math.cos(theta_c));    //余弦定理
-        //double maxX = 2 * distanceCamera_Display * Math.tan(theta_a);    // 横幅
+    
 
         // y方向の距離を求める
         double sinDistanceCamera_Display = y * Math.cos(theta_a) / distanceCamera_Display;    // 正弦定理
@@ -108,8 +106,8 @@ public class Robot extends TimedRobot {
         result[0]  = maxH * x / distanceCamera_DisplayZ; 
 
         return result;
-    }
-
+    }  
+  
     @Override
     public void robotInit() {
         // Controller
@@ -119,10 +117,9 @@ public class Robot extends TimedRobot {
 
 
         // Motors
-        driveRightFront  = new Spark(Const.DriveRightFrontPort);
-        driveRightBack = new Spark(Const.DriveRightBackPort);
-        driveLeftFront = new Spark(Const.DriveLeftFrontPort);
-        driveLeftBack = new Spark(Const.DriveLeftBackPort);
+        driveRight = new Spark(Const.DriveRightPort);
+        driveLeft = new Spark(Const.DriveLeftPort);
+    
 
         liftMotor = new Talon(Const.LiftMotorPort);
 
@@ -130,11 +127,6 @@ public class Robot extends TimedRobot {
 
         climbMotor = new Talon(Const.ClimbMotorPort);
 
-        // SpeedControllerGroup
-        rightDriveGroup = new SpeedControllerGroup(driveRightFront, driveRightBack);
-        leftDriveGroup = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
-
-        // Encoder,Gyro
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
         leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
         driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
@@ -167,7 +159,7 @@ public class Robot extends TimedRobot {
         state = new State();
 
         // Submodules
-        drive = new Drive(rightDriveGroup, leftDriveGroup, driveEncoder, gyro);
+        drive = new Drive(driveLeft, driveRight, driveEncoder, gyro);
         lift = new Lift(liftMotor, liftEncoder);
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
         climb = new Climb(climbMotor, frontClimbSolenoid, backClimbSolenoid);
@@ -175,11 +167,12 @@ public class Robot extends TimedRobot {
   
     @Override
     public void autonomousInit() {
-       armSolenoid.set(true);    // しまってあるアームを展開する
     }
 
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+        teleopPeriodic();
+    }
 
     @Override
     public void teleopInit() {
@@ -193,136 +186,170 @@ public class Robot extends TimedRobot {
          */
         state.stateInit();
 
-        /**
+        /*
          * Joystickやセンサーからの入力を受け取ってstate objectに値を流しこむ
          */
         /********** Drive ***********/
         if (driver.getBumper(Hand.kLeft)) {
-          state.driveState = State.DriveState.kLineTrace;
+            state.driveState = State.DriveState.kLineTrace;
         } else if (driver.getBumper(Hand.kRight)) {
-          state.driveState = State.DriveState.kCloseToLine;
+            state.driveState = State.DriveState.kCloseToLine;
         } else {
-          state.driveState = State.DriveState.kManual;
-          state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
-          state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
+            state.driveState = State.DriveState.kManual;
+            state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+            state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
         }
 
         /********** Lift ***********/
+        /**
+         * Liftは全てoperatorが操作する
+         */
         if (operator.getBumper(Hand.kLeft) && operator.getYButton()) {
-          state.liftSetpoint = Const.RocketSecondCargoHeight;
-          state.is_liftPIDOn = true;
+            // LeftBumper + YでRocketの二段目のCargo
+            state.liftSetpoint = Const.RocketSecondCargoHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getBumper(Hand.kLeft) && operator.getXButton()) {
-          state.liftSetpoint = Const.RocketFirstCargoHeight;
-          state.is_liftPIDOn = true;
+            // LeftBumper + XでRocketの一段目のCargo
+            state.liftSetpoint = Const.RocketFirstCargoHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getBumper(Hand.kLeft) && operator.getBButton()) {
-          state.liftSetpoint = Const.ShipCargoHeight;
-          state.is_liftPIDOn = true;
+            // LeftBumber + BでRocketCargo ShipのCargo
+            state.liftSetpoint = Const.ShipCargoHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getYButton()) {
-          state.liftSetpoint = Const.RocketSecondHatchHeight;
-          state.is_liftPIDOn = true;
+            // YのみでRocketのの２段目のHatch
+            state.liftSetpoint = Const.RocketSecondHatchHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getXButton()) {
-          state.liftSetpoint = Const.RocketFirstHatchHeight;
-          state.is_liftPIDOn = true;
+            // XのみでRocketの一段目のHatch
+            state.liftSetpoint = Const.RocketFirstHatchHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getBButton()) {
-          state.liftSetpoint = Const.ShipHatchHeight;
-          state.is_liftPIDOn = true;
+            // BのみでCargo Shipのハッチ
+            state.liftSetpoint = Const.ShipHatchHeight;
+            state.is_liftPIDOn = true;
         } else if (operator.getAButton()) {
-          state.liftSetpoint = Const.GroundHeight;
-          state.is_liftPIDOn = true;
+            // AのみでGround
+            state.liftSetpoint = Const.GroundHeight;
+            state.is_liftPIDOn = true;
         } else {
-          state.liftSpeed = deadbandProcessing(operator.getY(Hand.kLeft));
-          state.is_liftPIDOn = false;
+            // それ以外の場合は手動操作
+            state.liftSpeed = deadbandProcessing(operator.getY(Hand.kLeft));
+            state.is_liftPIDOn = false;
         }
 
         /*********** Grabber ***********/
-        if (driver.getTriggerAxis(Hand.kLeft) > 0.5) {
-          state.cargoState = State.CargoState.kHold;
-        } else if (driver.getTriggerAxis(Hand.kRight) > 0.5) {
-          state.cargoState = State.CargoState.kRelease;
+        /**
+         * Cargoを掴む部分
+         * driverが操作する
+         */
+        if (driver.getTriggerAxis(Hand.kLeft) > Const.Deadband) {
+            // Left Triggerで掴む
+            state.cargoState = State.CargoState.kHold;
+        } else if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
+            // Right Triggerで離す
+            state.cargoState = State.CargoState.kRelease;
         } else {
-          state.cargoState = State.CargoState.kDoNothing;
+            // 普段はなにもしない
+            state.cargoState = State.CargoState.kDoNothing;
         }
 
         if (driver.getBumper(Hand.kRight)) {
-          state.is_toHoldPanel = true;
+            // Right Bumberでパネルを掴む（掴むところが広がる）
+            state.is_toHoldPanel = true;
         } else {
-          state.is_toHoldPanel = false;
+            // 普段は縮まっている
+            state.is_toHoldPanel = false;
         }
 
-
         /**
-         * Stateをapplyする
+         * Climb (ToDo)
          */
+
+        /*
+        　* Stateをapplyする
+        　*/
         drive.applyState(state);
         lift.applyState(state);
         grabber.applyState(state);
         climb.applyState(state);
 
         /*Command*
-         * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
+        * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
          */
-//        state.command = getCommand();// コマンドを判別
+
+         // Drive
+        /*
+       if(operateController. && operateController.){ 
+            distanceToLine = getLinePosition(displayPosition);
+          state.driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
+          state.driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
+       }
+
+        if(operateController. && operateController.){ 
+         //lineTrace()
+       }*/
+
+       /*Lift
+         *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
+         *  モーターの値を制御するならliftSpeedに代入
+       */
+//        if(operator.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBButton()){ 
+//         state.liftSetpoint = Const.ShipCargoHeight;
+//         state.is_liftPIDOn = true;
 //
-//        switch(state.command) {
-//        // Drive
-//        case closeToLine:
-//            distanceToLine = getLinePosition(displayPosition);
-//            state.driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
-//            state.driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
-//            break;
+//         state.is_toHoldArm = true;
+//        }
 //
-//        case lineTrace:
-//            break;
+//        if(operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getXButton()){ 
+//            state.liftSetpoint = Const.RocketCargoFirstHeight;
+//          state.is_liftPIDOn = true;
 //
-//          /*Lift
-//           *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
-//           *  モーターの値を制御するならliftSpeedに代入
-//           */
-//          case moveToShipCargoHeight:
-//            state.liftSetpoint = Const.shipCargoHeight;
+//           state.is_toHoldArm = true;
+//        }
+//
+//        if(operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getYButton()){ 
+//            state.liftSetpoint = Const.RocketCargoSecondHeight;
 //            state.is_liftPIDOn = true;
-//            break;
 //
-//          case moveToRocketCargo_1Height:
-//            state.liftSetpoint = Const.rocketCargo_1Height;
+//            state.is_toHoldArm = true;
+//        }
+//
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getXButton()){ 
+//            state.liftSetpoint = Const.FirstPanelHeight;
 //            state.is_liftPIDOn = true;
-//            break;
 //
-//          case moveToRocketCargo_2Height:
-//            state.liftSetpoint = Const.rocketCargo_2Height;
+//            state.is_toHoldArm = true;
+//        }
+//
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getYButton()){
+//            state.liftSetpoint = Const.SecondPanelHeight;
 //            state.is_liftPIDOn = true;
-//            break;
 //
-//          case moveToPanel_1Height:
-//            state.liftSetpoint = Const.panel_1Height;
-//            state.is_liftPIDOn = true;
-//            break;
+//            state.is_toHoldArm = true;
+//        }
 //
-//          case moveToPanel_2Height:
-//            state.liftSetpoint = Const.panel_2Height;
-//            state.is_liftPIDOn = true;
-//            break;
-//
-//          case keepLiftHeight:
-//            state.liftSpeed = Const.keepLiftHeightSpeed;
-//            break;
+//        /* ToDo:lift.applyState()に実装
+//        if(operateController. && operateController.){ 
+//          state.liftSpeed = Const.KeepLiftHeightSpeed;
+//        }*/
 //
 //        /*Arm
 //         * ローラーやメカナムを回してカーゴを回収したり射出したりする
 //         * 棒を開いたり閉じたりしてパネルを保持したり開放したりする
 //         */
 //         
-//          case holdCargo:
-//            state.whetherHoldCargo = true;
-//            break;
+//        if(driveController.getTriggerAxis(Hand.kRight) > Const.Deadband && driveController.getTriggerAxis(Hand.kLeft) > Const.Deadband && driveController.getBumper(Hand.kRight)){ 
+//            state.cargoState = State.CargoState.kHold;
+//        }
 //
-//          case releaseCargo:
-//            state.whetherReleaseCargo = true;
-//            break;
+//        if(driveController.getTriggerAxis(Hand.kRight) > Const.Deadband && driveController.getTriggerAxis(Hand.kLeft) > Const.Deadband && driveController.getBumper(Hand.kLeft)){ 
+//            state.cargoState = State.CargoState.kRelease;
+//        }
 //
-//          case changeBarState:
-//            state.whetherHoldPanel = !state.whetherHoldPanel;// ボタンを押したら状態が変わる
-//            break;
+//        if(driveController.getBumper(Hand.kLeft) && driveController.getBumper(Hand.kRight)){ 
+//            state.is_toHoldPanel = true;
+//        }
 //
 //        /*Climb
 //         * Climbの流れ
@@ -330,58 +357,59 @@ public class Robot extends TimedRobot {
 //         * 　2.ソレノイドでストッパーを出す。
 //         *   3.リフトを下げる。(ここで車体が持ち上がる)
 //         *   4.モーターを回して前に進む
+//         *   5.後処理
 //         */
+//        // ToDo
 //
-//          // 1
-//          case climbMoveToHab_2Height:
-//            state.liftSetpoint = Const.hab_2Height;
+//        // 1
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getYButton()){ 
+//            state.liftSetpoint = Const.HabSecondHeight;
 //            state.is_liftPIDOn = true;
-//            break;
+//        }
 //
-//          case climbMoveToHab_3Height:
-//            state.liftSetpoint = Const.hab_3Height;
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getAButton()){ 
+//            state.liftSetpoint = Const.HabThirdHeight;
 //            state.is_liftPIDOn = true;
-//            break;
+//        }
 //
-//          // 2
-//          case climbStopperOn:
-//            state.is_climbSolenoidOn = true;   //ここはClimbの関数使う
-//            break;
+//        // 2,3
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getXButton()){ 
+//            climb.climbStopperSet(true);
 //
-//          // 3
-//          case climbLiftDown:
-//            state.liftSpeed = -1.0;    
-//            break;
+//            try{
+//            Thread.sleep(Const.SolenoidSleepTime);
+//            }catch(Exception e){
+//            }
 //
-//          // 4
-//          case climbAdvance:
-//            state.driveXSpeed = 0;
-//            state.climbMotorSpeed = 1.0;    ////ここはClimbの関数使う
-//            break;
+//            state.liftSetpoint = 0;
+//            state.is_liftPIDOn = true;
+//        }
 //
+//        // 4
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight)){
+//            state.driveStraightSpeed = deadbandProcessing(driveController.getY(Hand.kRight));
+//            state.driveRotateSpeed = deadbandProcessing(driveController.getX(Hand.kRight));
+//            climb.climbAdvance(deadbandProcessing(driveController.getY(Hand.kRight)));   
+//      
+//            state.is_toHoldArm = true;
+//        }
 //
+//        //5 ToDo:コマンド完成
+//        /*
+//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight)){
+//            climb.climbStopperSet(false);
 //
-//        // NoCommand
-//          case noCommand:
-//          default:
-//          state.is_noCommand = false;
-//        }     
+//        try{
+//            Thread.sleep(Const.SolenoidSleepTime);
+//        }catch(Exception e){
+//        }
+//            
+//          state.liftSetpoint = 0;
+//          state.is_liftPIDOn = true;
+//        }
+//        */
+//           
       
 
-
-  /*Substitute
-   *  コマンドやコントローラーによって変えられた変数を代入する。
-   */
-   /*
-
-    if(is_liftPIDOn){
-      lift.setSetpoint(liftSetpoint);    // PID制御
-      lift.PIDEnable();
-    }else{
-      lift.PIDDisable();
-      lift.setSpeed(liftSpeed);    // 普通のモーター制御
     }
-
-    */
-  }
 }
