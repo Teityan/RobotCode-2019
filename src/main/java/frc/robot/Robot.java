@@ -316,7 +316,7 @@ public class Robot extends TimedRobot {
                     // ToDo:
                     //state.liftSetpoint = Const.LiftClimbHeight;
                     //state.is_liftPIDOn = true;
-                    //state.is_lockClimb = true;
+                    state.is_lockClimb = true;
                     break;
             }
         } else {
