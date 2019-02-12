@@ -262,6 +262,13 @@ public class Robot extends TimedRobot {
             state.is_toHoldPanel = false;
         }
 
+        if (operator.getBumper(Hand.kRight)) {
+            // Right BumberでArmをしまう
+            state.is_toRetractArm = true;
+        } else {
+            state.is_toRetractArm = false;
+        }
+
         /**
          * Climb (ToDo)
          */
