@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
     private State state;
@@ -40,6 +41,9 @@ public class Robot extends TimedRobot {
     // Solenoid
     private Solenoid armSolenoid, barSolenoid;
     private Solenoid frontClimbSolenoid, backClimbSolenoid;
+
+    // Timer for climb
+    private Timer climbTimer;
 
     // SubModule
     private Drive drive;
@@ -147,6 +151,10 @@ public class Robot extends TimedRobot {
         //rightBackSensor = new AnalogInput(Const.RightBackSensorPort);
         //leftFrontSensor = new AnalogInput(Const.LeftFrontSensorPort);
         //leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
+        //
+
+        // Climb Timer
+        climbTimer = new Timer();
 
         // Camera
         camera = CameraServer.getInstance();
@@ -272,6 +280,48 @@ public class Robot extends TimedRobot {
         /**
          * Climb (ToDo)
          */
+        if (driver.getAButton()) {
+            // 自動Climb
+            state.is_autoClimbOn = true;
+
+            switch (state.climbSequence) {
+                case kDoNothing:
+                    state.climbSequence = State.ClimbSequence.kLiftUp;
+                    break;
+
+                case kLiftUp:
+                    state.liftSetpoint = Const.HabSecondHeight;
+                    state.is_liftPIDOn = true;
+
+                    if (lift.is_PIDOnTarget()) {
+                        state.climbSequence = State.ClimbSequence.kLocking;
+                        climbTimer.reset();
+                        climbTimer.start();
+                    }
+                    break;
+
+                case kLocking:
+                    state.liftSetpoint = Const.HabSecondHeight;
+                    state.is_liftPIDOn = true;
+
+                    state.is_lockClimb = true;
+
+                    if (climbTimer.get() > 0.2) {
+                        state.climbSequence = State.ClimbSequence.kLiftDown;
+                    }
+                    break;
+            
+
+                case kLiftDown:
+                    // ToDo:
+                    //state.liftSetpoint = Const.LiftClimbHeight;
+                    //state.is_liftPIDOn = true;
+                    //state.is_lockClimb = true;
+                    break;
+            }
+        } else {
+            state.is_autoClimbOn = false;
+        }
 
         /*
         　* Stateをapplyする
@@ -415,8 +465,5 @@ public class Robot extends TimedRobot {
 //          state.is_liftPIDOn = true;
 //        }
 //        */
-//           
-      
-
     }
 }

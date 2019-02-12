@@ -83,7 +83,7 @@ public class Const {
 		panel_2Height(0);		
 
 		public double height;
-		private  ArmHeight(double height){
+		private  ArmHeight(double height) {
 			this.height = height;
 		}
 	}

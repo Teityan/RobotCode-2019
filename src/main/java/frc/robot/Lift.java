@@ -119,4 +119,7 @@ public class Lift {
         pid.setSetpoint(point.getSetpoint());
     }
 
+    public boolean is_PIDOnTarget() {
+        return pid.onTarget();
+    }
 }
