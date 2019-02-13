@@ -6,22 +6,23 @@ import edu.wpi.first.wpilibj.Talon;
 public class Climb {
 
     private Talon climbMotor;
-    private Solenoid frontClimbSolenoid;
-    private Solenoid backClimbSolenoid;
+    private Solenoid climbSolenoid;
 
-    Climb(Talon climbMotor, Solenoid frontClimbSolenoid, Solenoid backClimbSolenoid){
+    Climb(Talon climbMotor, Solenoid climbSolenoid){
         this.climbMotor = climbMotor;
-        this.frontClimbSolenoid = frontClimbSolenoid;
-        this.backClimbSolenoid = backClimbSolenoid;
+        this.climbSolenoid = climbSolenoid;
     }
 
     public void climbAdvance(double speed){
         climbMotor.setSpeed(speed);
     }
 
-    public void climbStopperSet(boolean on){
-        frontClimbSolenoid.set(on);
-        backClimbSolenoid.set(on);
+    public void climbLockStopper(){
+        climbSolenoid.set(true);      
+    }
+
+    public void climbUnlockStopper(){
+        climbSolenoid.set(false);
     }
 
     public void applyState(State state) {
@@ -36,9 +37,6 @@ public class Climb {
             case kLiftDown:
                 break;
             }
-        } else {
-            climbMotor.set(state.climbMotorSpeed);
-            frontClimbSolenoid.set(state.is_lockClimb);
         }
     }
 

@@ -89,11 +89,11 @@ public class Grabber {
     }
 
     public void holdPanel() {
-        barSolenoid.set(true);    //ソレノイドのつけ方によりT/Fは変わる
+        barSolenoid.set(false);   
     }
 
     public void releasePanel() {
-        barSolenoid.set(false);    //ソレノイドのつけ方によりT/Fは変わる
+        barSolenoid.set(true);   
     }
 
     public void retractArm() {

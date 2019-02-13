@@ -15,7 +15,7 @@ public class Const {
 	//public static final int DriveRightFrontPort = 1;
 	//public static final int DriveLeftFrontPort = 0;
 	//public static final int DriveRightBackPort = 1;
-	//public static final int DriveLeftBackPort = 0;
+	//public static final int DriveLeftBackPort = 0;	// コードがまとめられたので宣言減った
 	
 	// LiftMotors
 	public static final int LiftMotorPort = 2;
@@ -27,8 +27,8 @@ public class Const {
 	public static final int RollerMotorPort = 3;
 
 	// Solenoids & Motors for climbing
-	public static final int FrontClimbSolenoidPort = 2;
-	public static final int BackClimbSolenoidPort = 3;
+	public static final int ClimbSolenoidPort = 2;
+	//public static final int BackClimbSolenoidPort = 3;	// チューブがまとめられたので宣言が減った
 	public static final int ClimbMotorPort = 4;
 	
 	// DriveBaseEncoders

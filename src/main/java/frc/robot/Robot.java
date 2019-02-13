@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
 
     // Solenoid
     private Solenoid armSolenoid, barSolenoid;
-    private Solenoid frontClimbSolenoid, backClimbSolenoid;
+    private Solenoid climbSolenoid;
 
     // Timer for climb
     private Timer climbTimer;
@@ -143,8 +143,7 @@ public class Robot extends TimedRobot {
         armSolenoid = new Solenoid(Const.ArmSolenoidPort);
         barSolenoid = new Solenoid(Const.BarSolenoidPort);
 
-        frontClimbSolenoid = new Solenoid(Const.FrontClimbSolenoidPort);
-        backClimbSolenoid = new Solenoid(Const.BackClimbSolenoidPort);
+        climbSolenoid = new Solenoid(Const.ClimbSolenoidPort);
 
         // Sensor
         //rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
@@ -170,7 +169,7 @@ public class Robot extends TimedRobot {
         drive = new Drive(driveLeft, driveRight, driveEncoder, gyro);
         lift = new Lift(liftMotor, liftEncoder);
         grabber = new Grabber(rollerMotor, barSolenoid, armSolenoid);
-        climb = new Climb(climbMotor, frontClimbSolenoid, backClimbSolenoid);
+        climb = new Climb(climbMotor, climbSolenoid);
     }
   
     @Override
@@ -316,7 +315,7 @@ public class Robot extends TimedRobot {
                     // ToDo:
                     //state.liftSetpoint = Const.LiftClimbHeight;
                     //state.is_liftPIDOn = true;
-                    state.is_lockClimb = true;
+                    state.is_lockClimb = false; //ロックを外す
                     break;
             }
         } else {
