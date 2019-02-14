@@ -48,8 +48,7 @@ public class Drive extends DifferentialDrive{
 				break;
 
 			case kLineTrace:
-				//startLineTrace();
-				//lineTracePIDEnable();
+				//lineTrace();
 				break;
 
 			case kCloseToLine:

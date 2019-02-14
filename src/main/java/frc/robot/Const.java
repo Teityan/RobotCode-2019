@@ -12,10 +12,6 @@ public class Const {
 	// DriveBaseMotors
 	public static final int DriveRightPort = 1;
 	public static final int DriveLeftPort = 0;
-	//public static final int DriveRightFrontPort = 1;
-	//public static final int DriveLeftFrontPort = 0;
-	//public static final int DriveRightBackPort = 1;
-	//public static final int DriveLeftBackPort = 0;	// コードがまとめられたので宣言減った
 	
 	// LiftMotors
 	public static final int LiftMotorPort = 2;
@@ -28,7 +24,6 @@ public class Const {
 
 	// Solenoids & Motors for climbing
 	public static final int ClimbSolenoidPort = 2;
-	//public static final int BackClimbSolenoidPort = 3;	// チューブがまとめられたので宣言が減った
 	public static final int ClimbMotorPort = 4;
 	
 	// DriveBaseEncoders
@@ -51,19 +46,19 @@ public class Const {
 		Field Dimension	
 		everything in cm
 	 */
-	public static final double RocketFirstCargoHeight = 0;
-	public static final double RocketSecondCargoHeight = 0;
-	public static final double RocketFirstHatchHeight = 0;
-	public static final double RocketSecondHatchHeight = 0;
-	public static final double ShipCargoHeight = 0;
-	public static final double ShipHatchHeight = 0;
-	public static final double HabSecondHeight = 0;
-	public static final double HabThirdHeight = 0;
+	public static final double CmPerInch = 2.54;
+
+	// 穴の中央の高さ 
+	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch;
+	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch;
+	public static final double RocketFirstHatchHeight = 18.3 * CmPerInch;
+	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch;
+	public static final double ShipCargoHeight = 40 * CmPerInch;
+	public static final double ShipHatchHeight = 18.3 * CmPerInch;
+	public static final double HabSecondHeight = 6 * CmPerInch;
+	public static final double HabThirdHeight = 19 * CmPerInch;
 	public static final double GroundHeight = 0;
-	//public static final double FirstPanelHeight = 0;
-	//public static final double SecondPanelHeight = 0;
-	//public static final double HabSecondHeight;
-	//public static final double HabThirdHeight;
+
 
 	/**
 		Robot Dimension
