@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drive extends DifferentialDrive{
 
@@ -25,7 +26,7 @@ public class Drive extends DifferentialDrive{
 	private EncoderGroup e_drive;
 	private ADXRS450_Gyro g_drive;
 
-	private PIDController straightController, turnController;
+	private PIDController straightController, rotateController;
 	
 	
  
@@ -36,7 +37,7 @@ public class Drive extends DifferentialDrive{
 
 		straightController = new PIDController(Const.DriveStraightKp, Const.DriveStraightKi, Const.DriveStraightKd, e_drive,
 				new DrivePIDOutput(PIDMode.Straight));
-		turnController = new PIDController(Const.DriveRotateKp, Const.DriveRotateKi, Const.DriveRotateKd, g_drive,
+		rotateController = new PIDController(Const.DriveRotateKp, Const.DriveRotateKi, Const.DriveRotateKd, g_drive,
 				new DrivePIDOutput(PIDMode.Rotate));
 	}
 
@@ -76,7 +77,7 @@ public class Drive extends DifferentialDrive{
 
 	public void setRelativeSetpoint(double straightSetpoint, double turnSetpoint) {
 		straightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
-		turnController.setSetpoint(g_drive.getAngle() + turnSetpoint);
+		rotateController.setSetpoint(g_drive.getAngle() + turnSetpoint);
     }
     
     public void setStraightSetpoint(double straightSetpoint) {
@@ -89,7 +90,7 @@ public class Drive extends DifferentialDrive{
 
     public void setSetpoint(double straightSetpoint, double turnSetpoint) {
         straightController.setSetpoint(straightSetpoint);
-		turnController.setSetpoint(turnSetpoint);
+		rotateController.setSetpoint(turnSetpoint);
     }
 
 
@@ -97,8 +98,8 @@ public class Drive extends DifferentialDrive{
 		if (!straightController.isEnabled()) {
 			straightController.enable();
 		}
-		if (!turnController.isEnabled()) {
-			turnController.enable();
+		if (!rotateController.isEnabled()) {
+			rotateController.enable();
 		}
 	}
 
@@ -107,15 +108,53 @@ public class Drive extends DifferentialDrive{
 			straightController.disable();
 			straightController.reset();
 		}
-		if (turnController.isEnabled()) {
-			turnController.disable();
-			turnController.reset();
+		if (rotateController.isEnabled()) {
+			rotateController.disable();
+			rotateController.reset();
 		}
 	}
 
 	public boolean is_PIDEnabled() {
-		return straightController.isEnabled() && turnController.isEnabled();
+		return straightController.isEnabled() && rotateController.isEnabled();
 	}
+		
+	public void setStraightP(double p) {
+		straightController.setP(p);
+	}
+
+	public void setStraightI(double i) {
+		straightController.setI(i);
+	}
+
+	public void setStraightD(double d) {
+		straightController.setD(d);
+	}
+
+	public void setRotateP(double p) {
+		rotateController.setP(p);
+	}
+
+	public void setRotateI(double i) {
+		rotateController.setI(i);
+	}
+
+	public void setRotateD(double d) {
+		rotateController.setD(d);
+	}
+    
+    public void printVariables() {
+		SmartDashboard.putNumber("straightOutput", straightOutput);
+		SmartDashboard.putNumber("rotateOutput", rotateOutput);
+		SmartDashboard.putNumber("e_drive.getDistance()", e_drive.getDistance());
+		SmartDashboard.putNumber("g_drive.getAngle()", g_drive.getAngle());
+
+		SmartDashboard.putNumber("straightController.getP()", straightController.getP());
+        SmartDashboard.putNumber("straightController.getI()", straightController.getI());
+		SmartDashboard.putNumber("straightController.getD()", straightController.getD());
+		SmartDashboard.putNumber("rotateController.getP()", rotateController.getP());
+        SmartDashboard.putNumber("rotateController.getI()", rotateController.getI());
+        SmartDashboard.putNumber("rotateController.getD()", rotateController.getD());
+    }
 
 	public class DrivePIDOutput implements PIDOutput {
 

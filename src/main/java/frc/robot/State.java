@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.awt.image.SampleModel;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class State {
@@ -43,8 +45,6 @@ public class State {
     // Climb
     public ClimbSequence climbSequence;
     public boolean is_autoClimbOn;
-    public boolean is_lockFrontClimb;
-    public boolean is_lockBackClimb;
     public boolean is_lockClimb;    // ストッパーを出すかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
 
@@ -77,7 +77,21 @@ public class State {
         climbMotorSpeed = 0;
     }
 
-    public void printVariables(){
-        SmartDashboard.putNumber("driveStraightSpeed", driveStraightSpeed);
+    public void printVariables() {
+        SmartDashboard.putNumber("ddriveStraightSpeed", driveStraightSpeed);
+        SmartDashboard.putNumber("driveRotateSpeed", driveRotateSpeed);
+        SmartDashboard.putNumber("ddriveStraightSetpoint", driveStraightSetpoint);
+        SmartDashboard.putNumber("driveRotateSetpoint", driveRotateSetpoint);
+        SmartDashboard.putNumber("liftSpeed", liftSpeed);
+        SmartDashboard.putNumber("liftSetpoint", liftSetpoint);
+        SmartDashboard.putNumber("climbMotorSpeed", climbMotorSpeed);
+
+        SmartDashboard.putBoolean("is_drivePIDOn", is_drivePIDOn);
+        SmartDashboard.putBoolean("is_lineTraceOn", is_lineTraceOn);
+        SmartDashboard.putBoolean("is_liftPIDOn", is_liftPIDOn);
+        SmartDashboard.putBoolean("is_toHoldPanel", is_toHoldPanel);
+        SmartDashboard.putBoolean("is_toRetractArm", is_toRetractArm);
+        SmartDashboard.putBoolean("is_autoClimbOn;", is_autoClimbOn);
+        SmartDashboard.putBoolean("is_lockClimb;", is_lockClimb);
     }
 }

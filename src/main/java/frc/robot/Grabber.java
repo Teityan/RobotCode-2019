@@ -124,7 +124,7 @@ public class Grabber {
         棒を狭めてロボットが後退すればHATCH PANELを置けるようにする
     
 
-    holdArm();
+    retractArm();
         アームをしまう
     releaseArm();
         アームを出す

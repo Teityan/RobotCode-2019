@@ -11,6 +11,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Lift {
     /*
@@ -121,5 +122,13 @@ public class Lift {
 
     public boolean is_PIDOnTarget() {
         return pid.onTarget();
+    }
+
+    public void printVariables() {
+        SmartDashboard.putNumber("getHeight()", getHeight());
+        SmartDashboard.putNumber("pid.getP()", pid.getP());
+        SmartDashboard.putNumber("pid.getI()", pid.getI());
+        SmartDashboard.putNumber("pid.getD()", pid.getD());
+
     }
 }
