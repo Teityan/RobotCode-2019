@@ -26,18 +26,6 @@ public class Climb {
     }
 
     public void applyState(State state) {
-        if (state.is_autoClimbOn) {
-            switch (state.climbSequence) {
-            case kDoNothing:
-                break;
-            case kLiftUp:
-                break;
-            case kLocking:
-                break;
-            case kLiftDown:
-                break;
-            }
-        }
     }
 
 }

@@ -43,7 +43,7 @@ public class State {
     public boolean is_toRetractArm;
 
     // Climb
-    public ClimbSequence climbSequence;
+    public ClimbSequence climbSequence = ClimbSequence.kLiftUp;
     public boolean is_autoClimbOn;
     public boolean is_lockClimb;    // ストッパーを出すかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
@@ -71,7 +71,7 @@ public class State {
         is_toRetractArm = false;
    
         // Climb
-        climbSequence = ClimbSequence.kDoNothing;
+        // climbSequence = ClimbSequence.kDoNothing;
         is_autoClimbOn = false;
         is_lockClimb = false;
         climbMotorSpeed = 0;

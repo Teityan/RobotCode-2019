@@ -24,7 +24,6 @@ public class Robot extends TimedRobot {
     private State state;
 
     // Controller
-    //private Joystick joystick;
     private XboxController driver, operator;
 
     // Motors
@@ -212,23 +211,23 @@ public class Robot extends TimedRobot {
         /**
          * Liftは全てoperatorが操作する
          */
-        if (operator.getBumper(Hand.kLeft) && operator.getYButton()) {
-            // LeftBumper + YでRocketの二段目のCargo
+        if (operator.getYButton()) {
+            // YでRocketの二段目のCargo
             state.liftSetpoint = Const.RocketSecondCargoHeight;
             state.is_liftPIDOn = true;
-        } else if (operator.getBumper(Hand.kLeft) && operator.getXButton()) {
-            // LeftBumper + XでRocketの一段目のCargo
+        } else if (operator.getAButton()) {
+            // AでRocketの一段目のCargo
             state.liftSetpoint = Const.RocketFirstCargoHeight;
             state.is_liftPIDOn = true;
-        } else if (operator.getBumper(Hand.kLeft) && operator.getBButton()) {
-            // LeftBumber + BでRocketCargo ShipのCargo
+        } else if (operator.getBButton()) {
+            // BでRocketCargo ShipのCargo
             state.liftSetpoint = Const.ShipCargoHeight;
             state.is_liftPIDOn = true;
-        } else if (operator.getYButton()) {
-            // YのみでRocketのの２段目のHatch
+        } else if (operator.getXButton()) {
+            // XでRocketのの２段目のHatch
             state.liftSetpoint = Const.RocketSecondHatchHeight;
             state.is_liftPIDOn = true;
-        } else if (operator.getXButton()) {
+        } /*else if (operator.getXButton()) {
             // XのみでRocketの一段目のHatch
             state.liftSetpoint = Const.RocketFirstHatchHeight;
             state.is_liftPIDOn = true;
@@ -240,7 +239,7 @@ public class Robot extends TimedRobot {
             // AのみでGround
             state.liftSetpoint = Const.GroundHeight;
             state.is_liftPIDOn = true;
-        } else {
+        }*/ else {
             // それ以外の場合は手動操作
             state.liftSpeed = deadbandProcessing(operator.getY(Hand.kLeft));
             state.is_liftPIDOn = false;
@@ -251,19 +250,19 @@ public class Robot extends TimedRobot {
          * Cargoを掴む部分
          * driverが操作する
          */
-        if (driver.getTriggerAxis(Hand.kLeft) > Const.Deadband) {
-            // Left Triggerで掴む
+        if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
+            // Right Triggerで掴む
             state.cargoState = State.CargoState.kHold;
-        } else if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
-            // Right Triggerで離す
+        } else if (driver.getTriggerAxis(Hand.kLeft) > Const.Deadband) {
+            // Left Triggerで離す
             state.cargoState = State.CargoState.kRelease;
         } else {
             // 普段はなにもしない
             state.cargoState = State.CargoState.kDoNothing;
         }
 
-        if (driver.getBumper(Hand.kRight)) {
-            // Right Bumberでパネルを掴む（掴むところが広がる）
+        if (driver.getBButton()) {
+            // Bボタンでパネルを掴む（掴むところが広がる）
             state.is_toHoldPanel = true;
         } else {
             // 普段は縮まっている
@@ -280,6 +279,27 @@ public class Robot extends TimedRobot {
         /**
          * Climb (ToDo)
          */
+        if(operator.getStartButton() && operator.getXButton()){
+            state.is_autoClimbOn = true;
+            switch(state.climbSequence){
+                case kLiftUp:
+                    state.liftSetpoint = Const.HabSecondHeight;
+                    state.is_liftPIDOn = true;
+
+                    if(lift.is_PIDOnTarget()){
+                        state.climbSequence = State.ClimbSequence.kLocking;
+                    }
+
+                case kLocking:
+                    
+                    
+                    
+            }
+
+        }
+        
+
+
         if (driver.getAButton()) {
             // 自動Climb
             state.is_autoClimbOn = true;
