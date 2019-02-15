@@ -71,6 +71,7 @@ public class Lift {
         this.encoder = encoder;
         this.liftMotor = liftMotor;
         this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, liftMotor);
+        pid.setAbsoluteTolerance(Const.LiftPIDTolearnce);
     }
 
 	/**

@@ -55,7 +55,7 @@ public class Const {
 	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch;
 	public static final double ShipCargoHeight = 40 * CmPerInch;
 	public static final double ShipHatchHeight = 18.3 * CmPerInch;
-	public static final double HabSecondHeight = 6 * CmPerInch;
+	public static final double HabSecondHeight = 6 * CmPerInch + 10;
 	public static final double HabThirdHeight = 19 * CmPerInch;
 	public static final double GroundHeight = 0;
 
@@ -65,7 +65,9 @@ public class Const {
 	 */
 	public static final double DriveEncoderDistancePerPulse = 7.7 * Math.PI / 10.71;
     public static final double LiftMinHeight = 0 ;
-    public static final double LiftEncoderDistancePerPulse = 0;
+	public static final double LiftEncoderDistancePerPulse = -0.14;
+	
+	public static final double LiftPIDTolearnce = 5;
 	
 	// NetworkTable for finding lines
 	public static final String LineFindNetworkTable = "";
@@ -93,7 +95,7 @@ public class Const {
 	public static final double DriveRotateKp = 0;
 	public static final double DriveRotateKi = 0;
 	public static final double DriveRotateKd = 0;
-	public static final double LiftKp = 0;
+	public static final double LiftKp = 0.06;
 	public static final double LiftKi = 0;
 	public static final double LiftKd = 0;
 

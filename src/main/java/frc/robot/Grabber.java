@@ -65,12 +65,12 @@ public class Grabber {
     }
     
     public void holdCargo() {
-        rollerMotor.set(0.4);    //1は強すぎるので0.4に抑える
+        rollerMotor.set(0.6);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 
     public void releaseCargo() {
-        rollerMotor.set(-0.4);    //1は強すぎるので0.4に抑える
+        rollerMotor.set(-0.6);    //1は強すぎるので0.4に抑える
         is_RollerMoving = true;
     }
 

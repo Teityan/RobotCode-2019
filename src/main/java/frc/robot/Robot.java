@@ -118,7 +118,7 @@ public class Robot extends TimedRobot {
         // Controller
         //joystick = new Joystick(Const.JoystickPort);
         driver = new XboxController(Const.DriveControllerPort);
-        driver = new XboxController(Const.OperateControllerPort);
+        operator = new XboxController(Const.OperateControllerPort);
 
 
         // Motors
@@ -135,8 +135,10 @@ public class Robot extends TimedRobot {
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
         leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
         driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
+		driveEncoder.setDistancePerPulse(Const.DriveEncoderDistancePerPulse);
 
-        liftEncoder = new Encoder(Const.LiftEncoderAPort, Const.LiftEncoderBPort);
+		liftEncoder = new Encoder(Const.LiftEncoderAPort, Const.LiftEncoderBPort);
+		liftEncoder.setDistancePerPulse(Const.LiftEncoderDistancePerPulse);
 
         gyro = new ADXRS450_Gyro();
 
@@ -161,7 +163,7 @@ public class Robot extends TimedRobot {
         camera.startAutomaticCapture();
 
         // NetworkTable
-        networkTable = networkTable.getSubTable(Const.LineFindNetworkTable);
+        //networkTable = networkTable.getSubTable(Const.LineFindNetworkTable);
 
         // State
         state = new State();
@@ -204,7 +206,7 @@ public class Robot extends TimedRobot {
             state.driveState = State.DriveState.kCloseToLine;
         } else {
             state.driveState = State.DriveState.kManual;
-            state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+            state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft));
             state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
         }
 
@@ -242,7 +244,7 @@ public class Robot extends TimedRobot {
             state.is_liftPIDOn = true;
         }*/ else {
             // それ以外の場合は手動操作
-            state.liftSpeed = deadbandProcessing(operator.getY(Hand.kLeft));
+            state.liftSpeed = deadbandProcessing(-operator.getY(Hand.kLeft));
             state.is_liftPIDOn = false;
         }
 
@@ -281,21 +283,23 @@ public class Robot extends TimedRobot {
          * Climb (ToDo)
          */
         if(operator.getStartButton()) {
-			// スタートボタンでクライムを始める
-			state.is_autoClimbOn = true;
+			// スタートボタン + A or Yでクライムを始める
 			
             switch(state.climbSequence) {
 				case kLiftUp:
 					if(operator.getAButton()) {
 						// StartとAでHABのLEVEL2までリフトを上げる
                     	state.liftSetpoint = Const.HabSecondHeight;		
-    	                state.is_liftPIDOn = true;
+						state.is_liftPIDOn = true;
+						state.is_autoClimbOn = true;
 					}else if(operator.getYButton()) {
 						// StartとYでHABのLEVEL3までリフトを上げる
 						state.liftSetpoint = Const.HabThirdHeight;
 						state.is_liftPIDOn = true;
+						state.is_autoClimbOn = true;
 					}else{
-						
+						//コマンドがなかったら抜ける
+						break;
 					}
 					
                     if(lift.is_PIDOnTarget()) {
@@ -319,7 +323,7 @@ public class Robot extends TimedRobot {
                 
 				case kAdvance:
 					// スティックで前に進む
-					state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+					state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft));
 					break; 
 			}
 
@@ -431,139 +435,5 @@ public class Robot extends TimedRobot {
         grabber.applyState(state);
         climb.applyState(state);
 
-        /*Command*
-        * コントローラーからコマンドを受け取りそれに応じて変数の値を変える。
-         */
-
-         // Drive
-        /*
-       if(operateController. && operateController.){ 
-            distanceToLine = getLinePosition(displayPosition);
-          state.driveStraightSetpoint = Math.sqrt(distanceToLine[0]*distanceToLine[0] + distanceToLine[1]*distanceToLine[1]);
-          state.driveTurnSetpoint = Math.atan(distanceToLine[0]/distanceToLine[1]);
-       }
-
-        if(operateController. && operateController.){ 
-         //lineTrace()
-       }*/
-
-       /*Lift
-         *  PID制御ならliftSetpointに代入、is_PIDOnをtrueにする。
-         *  モーターの値を制御するならliftSpeedに代入
-       */
-//        if(operator.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBButton()){ 
-//         state.liftSetpoint = Const.ShipCargoHeight;
-//         state.is_liftPIDOn = true;
-//
-//         state.is_toHoldArm = true;
-//        }
-//
-//        if(operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getXButton()){ 
-//            state.liftSetpoint = Const.RocketCargoFirstHeight;
-//          state.is_liftPIDOn = true;
-//
-//           state.is_toHoldArm = true;
-//        }
-//
-//        if(operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getYButton()){ 
-//            state.liftSetpoint = Const.RocketCargoSecondHeight;
-//            state.is_liftPIDOn = true;
-//
-//            state.is_toHoldArm = true;
-//        }
-//
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getXButton()){ 
-//            state.liftSetpoint = Const.FirstPanelHeight;
-//            state.is_liftPIDOn = true;
-//
-//            state.is_toHoldArm = true;
-//        }
-//
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getYButton()){
-//            state.liftSetpoint = Const.SecondPanelHeight;
-//            state.is_liftPIDOn = true;
-//
-//            state.is_toHoldArm = true;
-//        }
-//
-//        /* ToDo:lift.applyState()に実装
-//        if(operateController. && operateController.){ 
-//          state.liftSpeed = Const.KeepLiftHeightSpeed;
-//        }*/
-//
-//        /*Arm
-//         * ローラーやメカナムを回してカーゴを回収したり射出したりする
-//         * 棒を開いたり閉じたりしてパネルを保持したり開放したりする
-//         */
-//         
-//        if(driveController.getTriggerAxis(Hand.kRight) > Const.Deadband && driveController.getTriggerAxis(Hand.kLeft) > Const.Deadband && driveController.getBumper(Hand.kRight)){ 
-//            state.cargoState = State.CargoState.kHold;
-//        }
-//
-//        if(driveController.getTriggerAxis(Hand.kRight) > Const.Deadband && driveController.getTriggerAxis(Hand.kLeft) > Const.Deadband && driveController.getBumper(Hand.kLeft)){ 
-//            state.cargoState = State.CargoState.kRelease;
-//        }
-//
-//        if(driveController.getBumper(Hand.kLeft) && driveController.getBumper(Hand.kRight)){ 
-//            state.is_toHoldPanel = true;
-//        }
-//
-//        /*Climb
-//         * Climbの流れ
-//         * 　1.リフトを上げる。
-//         * 　2.ソレノイドでストッパーを出す。
-//         *   3.リフトを下げる。(ここで車体が持ち上がる)
-//         *   4.モーターを回して前に進む
-//         *   5.後処理
-//         */
-//        // ToDo
-//
-//        // 1
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getYButton()){ 
-//            state.liftSetpoint = Const.HabSecondHeight;
-//            state.is_liftPIDOn = true;
-//        }
-//
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getAButton()){ 
-//            state.liftSetpoint = Const.HabThirdHeight;
-//            state.is_liftPIDOn = true;
-//        }
-//
-//        // 2,3
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight) && operateController.getXButton()){ 
-//            climb.climbStopperSet(true);
-//
-//            try{
-//            Thread.sleep(Const.SolenoidSleepTime);
-//            }catch(Exception e){
-//            }
-//
-//            state.liftSetpoint = 0;
-//            state.is_liftPIDOn = true;
-//        }
-//
-//        // 4
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight)){
-//            state.driveStraightSpeed = deadbandProcessing(driveController.getY(Hand.kRight));
-//            state.driveRotateSpeed = deadbandProcessing(driveController.getX(Hand.kRight));
-//            climb.climbAdvance(deadbandProcessing(driveController.getY(Hand.kRight)));   
-//      
-//            state.is_toHoldArm = true;
-//        }
-//
-//        //5 ToDo:コマンド完成
-//        /*
-//        if(operateController.getTriggerAxis(Hand.kLeft) > Const.Deadband && operateController.getTriggerAxis(Hand.kRight) > Const.Deadband && operateController.getBumper(Hand.kLeft) && operateController.getBumper(Hand.kRight)){
-//            climb.climbStopperSet(false);
-//
-//        try{
-//            Thread.sleep(Const.SolenoidSleepTime);
-//        }catch(Exception e){
-//        }
-//            
-//          state.liftSetpoint = 0;
-//          state.is_liftPIDOn = true;
-//        }
-//        */
     }
 }
