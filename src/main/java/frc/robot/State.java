@@ -22,6 +22,8 @@ public class State {
         kDoNothing,
         kLiftUp,
         kLocking,
+        kAdvance,
+        kUnlocking,
         kLiftDown
     }
 
@@ -45,7 +47,8 @@ public class State {
     // Climb
     public ClimbSequence climbSequence = ClimbSequence.kLiftUp;
     public boolean is_autoClimbOn;
-    public boolean is_lockClimb;    // ストッパーを出すかどうか
+    public boolean is_lockingClimb;    // ストッパーを出すかどうか
+    public boolean is_lockedClimb; //ストッパーが完全に出されたかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
 
     public State() {
@@ -73,7 +76,6 @@ public class State {
         // Climb
         // climbSequence = ClimbSequence.kDoNothing;
         is_autoClimbOn = false;
-        is_lockClimb = false;
         climbMotorSpeed = 0;
     }
 
@@ -92,6 +94,6 @@ public class State {
         SmartDashboard.putBoolean("is_toHoldPanel", is_toHoldPanel);
         SmartDashboard.putBoolean("is_toRetractArm", is_toRetractArm);
         SmartDashboard.putBoolean("is_autoClimbOn;", is_autoClimbOn);
-        SmartDashboard.putBoolean("is_lockClimb;", is_lockClimb);
+        SmartDashboard.putBoolean("is_lockedClimb;", is_lockedClimb);
     }
 }

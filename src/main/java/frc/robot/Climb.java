@@ -26,6 +26,14 @@ public class Climb {
     }
 
     public void applyState(State state) {
+        if(state.is_lockingClimb) {
+            climbLockStopper();
+        }else {
+            climbUnlockStopper();
+        }
+
+        climbAdvance(state.driveStraightSpeed);
+    
     }
 
 }

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import frc.robot.State.ClimbSequence;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot {
@@ -279,26 +280,105 @@ public class Robot extends TimedRobot {
         /**
          * Climb (ToDo)
          */
-        if(operator.getStartButton() && operator.getXButton()){
-            state.is_autoClimbOn = true;
-            switch(state.climbSequence){
-                case kLiftUp:
-                    state.liftSetpoint = Const.HabSecondHeight;
-                    state.is_liftPIDOn = true;
-
-                    if(lift.is_PIDOnTarget()){
-                        state.climbSequence = State.ClimbSequence.kLocking;
+        if(operator.getStartButton()) {
+			// スタートボタンでクライムを始める
+			state.is_autoClimbOn = true;
+			
+            switch(state.climbSequence) {
+				case kLiftUp:
+					if(operator.getAButton()) {
+						// StartとAでHABのLEVEL2までリフトを上げる
+                    	state.liftSetpoint = Const.HabSecondHeight;		
+    	                state.is_liftPIDOn = true;
+					}else if(operator.getYButton()) {
+						// StartとYでHABのLEVEL3までリフトを上げる
+						state.liftSetpoint = Const.HabThirdHeight;
+						state.is_liftPIDOn = true;
+					}else{
+						
+					}
+					
+                    if(lift.is_PIDOnTarget()) {
+						// 届いたらストッパーを出す
+						state.climbSequence = State.ClimbSequence.kLocking;
+						// ストッパーを出す時間を考慮して時間計る
+                        climbTimer.reset();
+						climbTimer.start();
                     }
+                    break;
 
-                case kLocking:
-                    
-                    
-                    
-            }
+				case kLocking:
+					// ストッパーを出す
+                    state.is_lockingClimb = true;
 
-        }
+                    if(climbTimer.get() > 0.3) {
+						// 時間がたったら前に進む
+                        state.climbSequence = State.ClimbSequence.kAdvance;
+                    }
+                    break;
+                
+				case kAdvance:
+					// スティックで前に進む
+					state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+					break; 
+			}
+
+			if(operator.getBackButton()){
+				// 緊急停止
+				state.is_autoClimbOn = false;
+				state.climbSequence = ClimbSequence.kLiftUp;
+			}
+
+        } else if(operator.getBackButton() && state.is_lockedClimb) {
+			// 十分前に進んで後輪がHABに乗ったら実行
+
+			switch(state.climbSequence) {
+				case kLiftUp:
+					// 乗っかったら後処理
+					// リフトを上げる
+					if(operator.getAButton()) {
+						// StartとAでHABのLEVEL2までリフトを上げる
+                    	state.liftSetpoint = Const.HabSecondHeight;		
+    	                state.is_liftPIDOn = true;
+					}else if(operator.getYButton()) {
+						// StartとYでHABのLEVEL3までリフトを上げる
+						state.liftSetpoint = Const.HabThirdHeight;
+						state.is_liftPIDOn = true;
+					}
+
+					if(lift.is_PIDOnTarget()){
+						// 届いたらストッパーを外す
+						state.climbSequence = State.ClimbSequence.kUnlocking;
+						climbTimer.reset();
+						climbTimer.start();
+					}	
+					break;
+
+				case kUnlocking:
+					// ストッパーを外す
+					state.is_lockingClimb = false;
+					if(climbTimer.get() > 0.3) {
+						// 時間がたったらリフトを下げる
+						state.climbSequence = State.ClimbSequence.kLiftDown;
+					}
+					break;
+
+				case kLiftDown:
+					// リフトを下げる
+					state.liftSpeed = -1;
+					break;
+			}
+
+				if(operator.getStartButton()){
+					// 緊急停止
+					state.is_autoClimbOn = false;
+					state.climbSequence = ClimbSequence.kLiftUp;
+				}
+		}
+
+
         
-
+		/*
 
         if (driver.getAButton()) {
             // 自動Climb
