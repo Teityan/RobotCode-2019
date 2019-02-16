@@ -27,10 +27,7 @@ public class Grabber {
         this.barSolenoid = barSolenoid;
         this.armSolenoid = armSolenoid;
     }
-
-	/**
-	 * ToDo
-	 */
+    
 	public void applyState(State state) {
         switch (state.cargoState) {
             case kHold:
@@ -58,19 +55,19 @@ public class Grabber {
         }
 
         if (state.is_toRetractArm) {
-            retractArm();
+            retractArm();    // アームをしまう
         } else {
-            releaseArm();
+            releaseArm();    // アームを出す
         }
     }
     
     public void holdCargo() {
-        rollerMotor.set(0.6);    //1は強すぎるので0.4に抑える
+        rollerMotor.set(1.0);   
         is_RollerMoving = true;
     }
 
     public void releaseCargo() {
-        rollerMotor.set(-0.6);    //1は強すぎるので0.4に抑える
+        rollerMotor.set(-1.0);    
         is_RollerMoving = true;
     }
 

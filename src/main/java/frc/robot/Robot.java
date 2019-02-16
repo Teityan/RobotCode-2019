@@ -313,7 +313,10 @@ public class Robot extends TimedRobot {
 
 				case kLocking:
 					// ストッパーを出す
-                    state.is_lockingClimb = true;
+					state.is_lockingClimb = true;
+					
+					// リフトが下がらないように維持する
+					state.liftSpeed = Const.KeepLiftHeightSpeed;
 
                     if(climbTimer.get() > 0.3) {
 						// 時間がたったら前に進む
@@ -361,6 +364,10 @@ public class Robot extends TimedRobot {
 				case kUnlocking:
 					// ストッパーを外す
 					state.is_lockingClimb = false;
+
+					// リフトが下がらないように維持する
+					state.liftSpeed = Const.KeepLiftHeightSpeed;
+
 					if(climbTimer.get() > 0.3) {
 						// 時間がたったらリフトを下げる
 						state.climbSequence = State.ClimbSequence.kLiftDown;

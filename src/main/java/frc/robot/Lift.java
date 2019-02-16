@@ -67,7 +67,7 @@ public class Lift {
     }
 
     // コンストラクター
-    Lift(Talon liftMotor, Encoder encoder){
+    Lift(Talon liftMotor, Encoder encoder) {
         this.encoder = encoder;
         this.liftMotor = liftMotor;
         this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, liftMotor);
@@ -105,24 +105,29 @@ public class Lift {
     }
 
     // PID
-    public void enablePID(){
+    public void enablePID() {
         pid.enable();
     }
 
-    public void disablePID(){
+    public void disablePID() {
         pid.disable();
     }
 
-    public void setSetpoint(double height){
+    public void setSetpoint(double height) {
         pid.setSetpoint(height);
     }
 
-    public void setSetopoint(PredefinedSetpoint point){
+    public void setSetopoint(PredefinedSetpoint point) {
         pid.setSetpoint(point.getSetpoint());
     }
 
     public boolean is_PIDOnTarget() {
-        return pid.onTarget();
+        if(pid.isEnabled()) {
+            return pid.onTarget();
+        }else{
+            // PIDがEnableにされてなかったら判断しない
+            return false;
+        }
     }
 
     public void printVariables() {
