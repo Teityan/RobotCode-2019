@@ -4,8 +4,7 @@ public class Const {
 	/**
 		Ports
 	 */
-	// Joystick
-	public static final int JoystickPort = 0;
+	// XBoxController
 	public static final int DriveControllerPort = 0;
 	public static final int OperateControllerPort = 1;
 	
@@ -48,15 +47,13 @@ public class Const {
 	 */
 	public static final double CmPerInch = 2.54;
 
-	// 穴の中央の高さ 
+	// 「カーゴを下に落ちないようにする板」を基準とした高さにする。 
 	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch;
 	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch;
-	public static final double RocketFirstHatchHeight = 18.3 * CmPerInch;
-	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch;
+	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
 	public static final double ShipCargoHeight = 40 * CmPerInch;
-	public static final double ShipHatchHeight = 18.3 * CmPerInch;
-	public static final double HabSecondHeight = 6 * CmPerInch + 10;
-	public static final double HabThirdHeight = 19 * CmPerInch;
+	public static final double HabSecondHeight = 6 * CmPerInch + 10;	// 枠より少し上にしてロックしてから下げるので10cm余裕を持たせる。
+	public static final double HabThirdHeight = 19 * CmPerInch + 10;	// 上に同じ
 	public static final double GroundHeight = 0;
 
 
@@ -65,19 +62,19 @@ public class Const {
 	 */
 	public static final double DriveEncoderDistancePerPulse = 7.7 * Math.PI / 10.71;
     public static final double LiftMinHeight = 0 ;
-	public static final double LiftEncoderDistancePerPulse = -0.14;
+	public static final double LiftEncoderDistancePerPulse = -0.14;    // エンコーダ(リフトのモーター)の向きと実際に動く向きが逆なのでマイナスがつく
 	
-	public static final double LiftPIDTolearnce = 5;
+	public static final double LiftPIDTolearnce = 5;	// LiftのPIDOnTargetの許容範囲
 	
 	// NetworkTable for finding lines
 	public static final String LineFindNetworkTable = "";
 
 	public static enum ArmHeight {
-		shipCargoHeight(0),
-		rocketFirstCargoHeight(0),
-		rocketSecondCargoHeight(0),
+		shipCargoHeight(ShipCargoHeight),
+		rocketFirstCargoHeight(RocketFirstCargoHeight),
+		rocketSecondCargoHeight(RocketSecondCargoHeight),
 		panel_1Height(0),
-		panel_2Height(0);		
+		panel_2Height(RocketSecondHatchHeight);		
 
 		public double height;
 		private  ArmHeight(double height) {
@@ -95,16 +92,13 @@ public class Const {
 	public static final double DriveRotateKp = 0;
 	public static final double DriveRotateKi = 0;
 	public static final double DriveRotateKd = 0;
-	public static final double LiftKp = 0.06;
+	public static final double LiftKp = 0.06;	// 適切に動くこと確認済み
 	public static final double LiftKi = 0;
 	public static final double LiftKd = 0;
 
 	// Constants for limitting acceleration
 	public static final double PIDPeriod = 0.05;
 	public static final double maxAcceleration = 0.5;
-
-	// Constant for sleep after Solenid moving
-	public static final int SolenoidSleepTime = 100;
 
 	//Constants for getting distance to the line
 	public static final double Theta_Camera_rad = Math.toRadians(0);
