@@ -264,8 +264,8 @@ public class Robot extends TimedRobot {
             state.cargoState = State.CargoState.kDoNothing;
         }
 
-        if (driver.getBButton()) {
-            // Bボタンでパネルを掴む（掴むところが広がる）
+        if (driver.getBumper(Hand.kRight)) {
+            // RightBumperボタンでパネルを掴む（掴むところが広がる）
             state.is_toHoldPanel = true;
         } else {
             // 普段は縮まっている
@@ -279,24 +279,24 @@ public class Robot extends TimedRobot {
             state.is_toRetractArm = false;
         }
 
-        /**
-         * Climb (ToDo)
-         */
+		/**
+		 * Climb
+		 */
         if(operator.getStartButton()) {
 			// スタートボタン + A or Yでクライムを始める
-			
+			state.is_autoClimbOn = true;
             switch(state.climbSequence) {
 				case kLiftUp:
 					if(operator.getAButton()) {
 						// StartとAでHABのLEVEL2までリフトを上げる
                     	state.liftSetpoint = Const.HabSecondHeight;		
 						state.is_liftPIDOn = true;
-						state.is_autoClimbOn = true;
+
 					}else if(operator.getYButton()) {
 						// StartとYでHABのLEVEL3までリフトを上げる
 						state.liftSetpoint = Const.HabThirdHeight;
 						state.is_liftPIDOn = true;
-						state.is_autoClimbOn = true;
+						
 					}else{
 						//コマンドがなかったら抜ける
 						break;
@@ -328,6 +328,9 @@ public class Robot extends TimedRobot {
 					// スティックで前に進む
 					state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft));
 					break; 
+
+				default:
+					break;
 			}
 
 			if(operator.getBackButton()){
@@ -377,6 +380,9 @@ public class Robot extends TimedRobot {
 				case kLiftDown:
 					// リフトを下げる
 					state.liftSpeed = -1;
+					break;
+				
+				default: 
 					break;
 			}
 
