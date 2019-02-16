@@ -19,12 +19,17 @@ public class State {
     }
 
     public enum ClimbSequence {
-        kDoNothing,
-        kLiftUp,
-        kLocking,
-        kAdvance,
-        kUnlocking,
-        kLiftDown
+        kDoNothing("kDoNothing"),
+        kLiftUp("kLiftUp"),
+        kLocking("kLocking"),
+        kAdvance("kAdvance"),
+        kUnlocking("kUnlocking"),
+        kLiftDown("kLiftDown");
+
+        String name;
+        ClimbSequence(String name) {
+            this.name = name;
+        }
     }
 
     // Drive
@@ -45,7 +50,7 @@ public class State {
     public boolean is_toRetractArm;
 
     // Climb
-    public ClimbSequence climbSequence = ClimbSequence.kLiftUp;
+    public ClimbSequence climbSequence = ClimbSequence.kDoNothing;
     public boolean is_autoClimbOn;
     public boolean is_lockingClimb;    // ストッパーを出すかどうか
     public boolean is_lockedClimb; //ストッパーが完全に出されたかどうか
@@ -66,6 +71,7 @@ public class State {
 
         // Lift
         liftSpeed = 0;
+        liftSetpoint = 0;
         is_liftPIDOn = false;
 
         // Grabber
@@ -74,7 +80,7 @@ public class State {
         is_toRetractArm = false;
    
         // Climb
-        // climbSequence = ClimbSequence.kDoNothing;
+        climbSequence = ClimbSequence.kDoNothing;
         is_autoClimbOn = false;
         climbMotorSpeed = 0;
     }
@@ -94,6 +100,9 @@ public class State {
         SmartDashboard.putBoolean("is_toHoldPanel", is_toHoldPanel);
         SmartDashboard.putBoolean("is_toRetractArm", is_toRetractArm);
         SmartDashboard.putBoolean("is_autoClimbOn;", is_autoClimbOn);
+        SmartDashboard.putBoolean("is_locking", is_lockingClimb);
         SmartDashboard.putBoolean("is_lockedClimb;", is_lockedClimb);
+
+        SmartDashboard.putString("climbSequence", climbSequence.name);
     }
 }

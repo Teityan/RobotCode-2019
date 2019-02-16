@@ -27,10 +27,7 @@ public class Climb {
 
     public void applyState(State state) {
 
-        if(state.is_autoClimbOn) {
-            // クライムしてなかったらロック外す
-            climbLockStopper();
-        }else if(state.is_lockingClimb) {
+        if(state.is_lockingClimb) {
             climbLockStopper();
         }else {
             climbUnlockStopper();

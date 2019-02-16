@@ -90,7 +90,7 @@ public class Lift {
 
     // モーター
     public void setSpeed(double speed) {
-        liftMotor.set(speed);
+        //liftMotor.set(speed);
     }
 
     // エンコーダー
@@ -114,7 +114,7 @@ public class Lift {
     }
 
     public void setSetpoint(double height) {
-        pid.setSetpoint(height);
+        //pid.setSetpoint(height);
     }
 
     public void setSetopoint(PredefinedSetpoint point) {

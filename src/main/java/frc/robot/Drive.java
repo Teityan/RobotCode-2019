@@ -45,7 +45,7 @@ public class Drive extends DifferentialDrive{
 		switch(state.driveState) {
 			case kManual:
 				PIDDisable();
-				setSpeed(state.driveStraightSpeed, state.driveRotateSpeed);
+				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed);
 				break;
 
 			case kLineTrace:
@@ -63,7 +63,7 @@ public class Drive extends DifferentialDrive{
 	}
 
 	public void setSpeed(double straightSpeed,double rotateSpeed) {
-		arcadeDrive(straightSpeed, rotateSpeed);
+		//arcadeDrive(straightSpeed, rotateSpeed);
 	}
 	
 

@@ -14,7 +14,6 @@ public class Const {
 	
 	// LiftMotors
 	public static final int LiftMotorPort = 2;
-	public static final double KeepLiftHeightSpeed = 0;
 
 	// ArmSolenoids & Motors
 	public static final int ArmSolenoidPort = 0;
@@ -52,8 +51,8 @@ public class Const {
 	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch;
 	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
 	public static final double ShipCargoHeight = 40 * CmPerInch;
-	public static final double HabSecondHeight = 6 * CmPerInch + 10;	// 枠より少し上にしてロックしてから下げるので10cm余裕を持たせる。
-	public static final double HabThirdHeight = 19 * CmPerInch + 10;	// 上に同じ
+	public static final double HabSecondHeight = 45;	// 枠より少し上にしてロックしてから下げるので10cm余裕を持たせる。
+	public static final double HabThirdHeight = 75;	// 上に同じ
 	public static final double GroundHeight = 0;
 
 
@@ -62,9 +61,11 @@ public class Const {
 	 */
 	public static final double DriveEncoderDistancePerPulse = 7.7 * Math.PI / 10.71;
     public static final double LiftMinHeight = 0 ;
-	public static final double LiftEncoderDistancePerPulse = -0.14;    // エンコーダ(リフトのモーター)の向きと実際に動く向きが逆なのでマイナスがつく
+	public static final double LiftEncoderDistancePerPulse = -0.1107585212;    // エンコーダ(リフトのモーター)の向きと実際に動く向きが逆なのでマイナスがつく
 	
 	public static final double LiftPIDTolearnce = 5;	// LiftのPIDOnTargetの許容範囲
+
+	public static final double KeepLiftHeightSpeed = 0.3;
 	
 	// NetworkTable for finding lines
 	public static final String LineFindNetworkTable = "";

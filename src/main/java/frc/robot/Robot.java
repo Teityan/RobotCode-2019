@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.State.ClimbSequence;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -199,14 +200,15 @@ public class Robot extends TimedRobot {
         /*
          * Joystickやセンサーからの入力を受け取ってstate objectに値を流しこむ
          */
-        /********** Drive ***********/
+		/********** Drive ***********/
+		/*
         if (driver.getBumper(Hand.kLeft)) {
             state.driveState = State.DriveState.kLineTrace;
         } else if (driver.getBumper(Hand.kRight)) {
             state.driveState = State.DriveState.kCloseToLine;
-        } else {
+        } else */{
             state.driveState = State.DriveState.kManual;
-            state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft));
+            state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
             state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
         }
 
@@ -230,19 +232,7 @@ public class Robot extends TimedRobot {
             // XでRocketのの２段目のHatch
             state.liftSetpoint = Const.RocketSecondHatchHeight;
             state.is_liftPIDOn = true;
-        } /*else if (operator.getXButton()) {
-            // XのみでRocketの一段目のHatch
-            state.liftSetpoint = Const.RocketFirstHatchHeight;
-            state.is_liftPIDOn = true;
-        } else if (operator.getBButton()) {
-            // BのみでCargo Shipのハッチ
-            state.liftSetpoint = Const.ShipHatchHeight;
-            state.is_liftPIDOn = true;
-        } else if (operator.getAButton()) {
-            // AのみでGround
-            state.liftSetpoint = Const.GroundHeight;
-            state.is_liftPIDOn = true;
-        }*/ else {
+        }else {
             // それ以外の場合は手動操作
             state.liftSpeed = deadbandProcessing(-operator.getY(Hand.kLeft));
             state.is_liftPIDOn = false;
@@ -272,7 +262,7 @@ public class Robot extends TimedRobot {
             state.is_toHoldPanel = false;
         }
 
-        if (operator.getBumper(Hand.kRight)) {
+        if (operator.getBumper(Hand.kLeft)) {
             // Right BumberでArmをしまう
             state.is_toRetractArm = true;
         } else {
@@ -283,22 +273,28 @@ public class Robot extends TimedRobot {
 		 * Climb
 		 */
         if(operator.getStartButton()) {
+			String message = new String();
 			// スタートボタン + A or Yでクライムを始める
 			state.is_autoClimbOn = true;
             switch(state.climbSequence) {
+				case kDoNothing:
 				case kLiftUp:
-					if(operator.getAButton()) {
-						// StartとAでHABのLEVEL2までリフトを上げる
+					if(operator.getTriggerAxis(Hand.kRight) > Const.Deadband) {
+						// StartとRightTriggerでHABのLEVEL2までリフトを上げる
                     	state.liftSetpoint = Const.HabSecondHeight;		
 						state.is_liftPIDOn = true;
 
-					}else if(operator.getYButton()) {
-						// StartとYでHABのLEVEL3までリフトを上げる
+						message = "LiftSet";
+						
+
+					}else if(operator.getBumper(Hand.kRight)) {
+						// StartとRightBumperでHABのLEVEL3までリフトを上げる
 						state.liftSetpoint = Const.HabThirdHeight;
 						state.is_liftPIDOn = true;
 						
 					}else{
 						//コマンドがなかったら抜ける
+						message = "No Command";
 						break;
 					}
 					
@@ -308,7 +304,11 @@ public class Robot extends TimedRobot {
 						// ストッパーを出す時間を考慮して時間計る
                         climbTimer.reset();
 						climbTimer.start();
-                    }
+
+						message = "On Target";
+                    }else{
+						message = "Not On Target";
+					}
                     break;
 
 				case kLocking:
@@ -318,26 +318,31 @@ public class Robot extends TimedRobot {
 					// リフトが下がらないように維持する
 					state.liftSpeed = Const.KeepLiftHeightSpeed;
 
+					message = "Locking";
+
                     if(climbTimer.get() > 0.3) {
 						// 時間がたったら前に進む
-                        state.climbSequence = State.ClimbSequence.kAdvance;
+						state.climbSequence = State.ClimbSequence.kAdvance;
+						state.is_lockedClimb = true;
+
+						message = "Locked";
                     }
                     break;
                 
 				case kAdvance:
 					// スティックで前に進む
-					state.driveStraightSpeed = deadbandProcessing(-driver.getY(Hand.kLeft));
+					state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+					state.liftSpeed = -0.5;
+					state.is_lockingClimb = true;
+
+					message = "Advansing";
 					break; 
 
 				default:
 					break;
 			}
 
-			if(operator.getBackButton()){
-				// 緊急停止
-				state.is_autoClimbOn = false;
-				state.climbSequence = ClimbSequence.kLiftUp;
-			}
+			SmartDashboard.putString("message", message);
 
         } else if(operator.getBackButton() && state.is_lockedClimb) {
 			// 十分前に進んで後輪がHABに乗ったら実行
@@ -386,59 +391,12 @@ public class Robot extends TimedRobot {
 					break;
 			}
 
-				if(operator.getStartButton()){
-					// 緊急停止
-					state.is_autoClimbOn = false;
-					state.climbSequence = ClimbSequence.kLiftUp;
-				}
+		}else {
+			state.is_autoClimbOn = false;
+			// 初期化
+			//state.is_lockingClimb = false;
+			//state.is_lockedClimb = false;
 		}
-
-
-        
-		/*
-
-        if (driver.getAButton()) {
-            // 自動Climb
-            state.is_autoClimbOn = true;
-
-            switch (state.climbSequence) {
-                case kDoNothing:
-                    state.climbSequence = State.ClimbSequence.kLiftUp;
-                    break;
-
-                case kLiftUp:
-                    state.liftSetpoint = Const.HabSecondHeight;
-                    state.is_liftPIDOn = true;
-
-                    if (lift.is_PIDOnTarget()) {
-                        state.climbSequence = State.ClimbSequence.kLocking;
-                        climbTimer.reset();
-                        climbTimer.start();
-                    }
-                    break;
-
-                case kLocking:
-                    state.liftSetpoint = Const.HabSecondHeight;
-                    state.is_liftPIDOn = true;
-
-                    state.is_lockClimb = true;
-
-                    if (climbTimer.get() > 0.2) {
-                        state.climbSequence = State.ClimbSequence.kLiftDown;
-                    }
-                    break;
-            
-
-                case kLiftDown:
-                    // ToDo:
-                    //state.liftSetpoint = Const.LiftClimbHeight;
-                    //state.is_liftPIDOn = true;
-                    state.is_lockClimb = false; //ロックを外す
-                    break;
-            }
-        } else {
-            state.is_autoClimbOn = false;
-        }
 
         /*
         　* Stateをapplyする
@@ -446,7 +404,10 @@ public class Robot extends TimedRobot {
         drive.applyState(state);
         lift.applyState(state);
         grabber.applyState(state);
-        climb.applyState(state);
+		climb.applyState(state);
+		
+		lift.printVariables();
+		state.printVariables();
 
     }
 }
