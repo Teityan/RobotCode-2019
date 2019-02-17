@@ -288,10 +288,7 @@ public class Robot extends TimedRobot {
 //            break;
 //
 //          // 3
-//          case climbLiftDown:
-//            state.liftSpeed = -1.0;
-//            break;
-//
+//          
 //          // 4
 //          case climbAdvance:
 //            state.driveXSpeed = 0;

@@ -10,7 +10,10 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Lift {
     /*
@@ -46,6 +49,7 @@ public class Lift {
     Encoder encoder;
     Talon liftMotor;
     PIDController pid;
+    PIDMotor output;
 
     public static enum PredefinedSetpoint {
         shipHatch(1.5), 
@@ -69,7 +73,8 @@ public class Lift {
     Lift(Talon liftMotor, Encoder encoder){
         this.encoder = encoder;
         this.liftMotor = liftMotor;
-        this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, liftMotor);
+        this.output = new  PIDMotor(liftMotor, this);
+        this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, output);
     }
 
 	/**
@@ -117,7 +122,24 @@ public class Lift {
     }
 
     public void setSetopoint(PredefinedSetpoint point){
-        pid.setSetpoint(point.getSetpoint());
+        this.setSetpoint(point.getSetpoint());
     }
 
+}
+
+
+class PIDMotor implements PIDOutput {
+    
+    public Talon motor;
+    public Lift lift;
+
+    public PIDMotor(Talon motor, Lift lift) {
+        this.motor = motor;
+        this.lift = lift;
+    }
+
+    public void pidWrite(double output) {
+        SmartDashboard.putNumber("Speed",output);
+        //lift.setSpeed(output);
+    }
 }

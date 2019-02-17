@@ -57,8 +57,12 @@ public class Const {
 	/**
 		Robot Dimension
 	 */
+
 	public static final double DriveEncoderDistancePerPulse = 0;
-    public static final double LiftMinHeight = 0 ;
+	public static final double LiftMinHeight = 0 ;
+	
+	
+	//正の数入れるとマイナス
     public static final double LiftEncoderDistancePerPulse = 0;
 	
 	// NetworkTable for finding lines
