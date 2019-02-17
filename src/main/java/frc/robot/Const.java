@@ -44,15 +44,16 @@ public class Const {
 		Field Dimension	
 		everything in cm
 	 */
-	public static final double CmPerInch = 2.54;
+	private static final double CmPerInch = 2.54;
+	private static final double slightAdjustment = 10;	// 高さの微調整
 
 	// 「カーゴを下に落ちないようにする板」を基準とした高さにする。 
-	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch;
-	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch;
-	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
-	public static final double ShipCargoHeight = 40 * CmPerInch;
-	public static final double HabSecondHeight = 45;	// 枠より少し上にしてロックしてから下げるので10cm余裕を持たせる。
-	public static final double HabThirdHeight = 75;	// 上に同じ
+	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch + slightAdjustment;
+	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch + slightAdjustment;
+	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch + slightAdjustment;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
+	public static final double ShipCargoHeight = 40 * CmPerInch + slightAdjustment;
+	public static final double HabSecondHeight = 60;	
+	public static final double HabThirdHeight = 90;	
 	public static final double GroundHeight = 0;
 
 

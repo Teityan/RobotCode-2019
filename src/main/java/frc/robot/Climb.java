@@ -33,7 +33,7 @@ public class Climb {
             climbUnlockStopper();
         }
 
-        climbAdvance(state.driveStraightSpeed);
+        climbAdvance(state.climbMotorSpeed);
     
     }
 

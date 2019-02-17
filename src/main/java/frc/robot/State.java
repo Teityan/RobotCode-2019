@@ -1,7 +1,5 @@
 package frc.robot;
 
-import java.awt.image.SampleModel;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class State {
@@ -38,6 +36,7 @@ public class State {
     public double driveStraightSetpoint, driveRotateSetpoint;    // PID制御の目標値
     public boolean is_drivePIDOn;    // PID制御するかどうか
     public boolean is_lineTraceOn;    // ライントレースするかどうか
+    public boolean is_lowInputOn;
 
     // Lift
     public double liftSpeed;    // コントローラー制御の値
@@ -68,6 +67,7 @@ public class State {
         driveRotateSpeed = 0;
         is_drivePIDOn = false;
         is_lineTraceOn = false;
+        is_lowInputOn = false;
 
         // Lift
         liftSpeed = 0;
@@ -80,7 +80,7 @@ public class State {
         is_toRetractArm = false;
    
         // Climb
-        climbSequence = ClimbSequence.kDoNothing;
+        //climbSequence = ClimbSequence.kDoNothing;
         is_autoClimbOn = false;
         climbMotorSpeed = 0;
     }

@@ -42,9 +42,15 @@ public class Drive extends DifferentialDrive{
 	}
 
 	public void applyState(State state) {
+		
+
 		switch(state.driveState) {
 			case kManual:
 				PIDDisable();
+				if(state.is_lowInputOn){
+					state.driveStraightSpeed *= 0.6;
+					state.driveRotateSpeed *= 0.6;
+				}
 				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed);
 				break;
 
@@ -63,7 +69,7 @@ public class Drive extends DifferentialDrive{
 	}
 
 	public void setSpeed(double straightSpeed,double rotateSpeed) {
-		//arcadeDrive(straightSpeed, rotateSpeed);
+		arcadeDrive(straightSpeed, rotateSpeed);
 	}
 	
 

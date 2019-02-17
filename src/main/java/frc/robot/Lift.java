@@ -10,6 +10,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -47,6 +48,7 @@ public class Lift {
     Encoder encoder;
     Talon liftMotor;
     PIDController pid;
+    PIDMotor motor;
 
     public static enum PredefinedSetpoint {
         shipHatch(1.5), 
@@ -70,7 +72,8 @@ public class Lift {
     Lift(Talon liftMotor, Encoder encoder) {
         this.encoder = encoder;
         this.liftMotor = liftMotor;
-        this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, liftMotor);
+        this.motor = new PIDMotor(liftMotor , this);
+        this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, motor);
         pid.setAbsoluteTolerance(Const.LiftPIDTolearnce);
     }
 
@@ -90,7 +93,7 @@ public class Lift {
 
     // モーター
     public void setSpeed(double speed) {
-        //liftMotor.set(speed);
+        liftMotor.set(speed);
     }
 
     // エンコーダー
@@ -114,7 +117,7 @@ public class Lift {
     }
 
     public void setSetpoint(double height) {
-        //pid.setSetpoint(height);
+        pid.setSetpoint(height);
     }
 
     public void setSetopoint(PredefinedSetpoint point) {
@@ -122,12 +125,15 @@ public class Lift {
     }
 
     public boolean is_PIDOnTarget() {
-        if(pid.isEnabled()) {
-            return pid.onTarget();
-        }else{
-            // PIDがEnableにされてなかったら判断しない
-            return false;
+        if(!(pid.getSetpoint() == 0)){
+            if(pid.isEnabled()) {
+                return pid.onTarget();
+            }
         }
+        // PIDがEnableにされてなかったら判断しない
+        // PIDのSetpointが0だったら判断しない
+        return false;
+        
     }
 
     public void printVariables() {
@@ -136,5 +142,19 @@ public class Lift {
         SmartDashboard.putNumber("pid.getI()", pid.getI());
         SmartDashboard.putNumber("pid.getD()", pid.getD());
 
+    }
+}
+class PIDMotor implements PIDOutput {
+    
+    public Talon motor;
+    public Lift lift;
+
+    public PIDMotor(Talon motor, Lift lift) {
+        this.motor = motor;
+        this.lift = lift;
+    }
+
+    public void pidWrite(double output) {
+        lift.setSpeed(output);
     }
 }
