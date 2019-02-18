@@ -32,11 +32,11 @@ public class State {
 
     // Drive
     public DriveState driveState;
-    public double driveStraightSpeed, driveRotateSpeed;
+    public double driveStraightSpeed, driveRotateSpeed;    // コントローラー制御の値 
     public double driveStraightSetpoint, driveRotateSetpoint;    // PID制御の目標値
     public boolean is_drivePIDOn;    // PID制御するかどうか
     public boolean is_lineTraceOn;    // ライントレースするかどうか
-    public boolean is_lowInputOn;
+    public boolean is_lowInputOn;    // 低出力モードにするかどうか
 
     // Lift
     public double liftSpeed;    // コントローラー制御の値
@@ -44,15 +44,15 @@ public class State {
     public boolean is_liftPIDOn;    // PID制御するかどうか
 
     // Grabber
-    public CargoState cargoState;
+    public CargoState cargoState;    // カーゴをどうするか  
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
-    public boolean is_toRetractArm;
+    public boolean is_toRetractArm;    //  アームをしまうかどうか
 
     // Climb
-    public ClimbSequence climbSequence = ClimbSequence.kDoNothing;
-    public boolean is_autoClimbOn;
+    public ClimbSequence climbSequence = ClimbSequence.kDoNothing;    //    自動クライムの状態
+    public boolean is_autoClimbOn;    // 自動クライムするかどうか
     public boolean is_lockingClimb;    // ストッパーを出すかどうか
-    public boolean is_lockedClimb; //ストッパーが完全に出されたかどうか
+    public boolean is_lockedClimb;    //ストッパーが完全に出されたかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
 
     public State() {
@@ -80,7 +80,6 @@ public class State {
         is_toRetractArm = false;
    
         // Climb
-        //climbSequence = ClimbSequence.kDoNothing;
         is_autoClimbOn = false;
         climbMotorSpeed = 0;
     }

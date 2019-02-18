@@ -48,13 +48,15 @@ public class Drive extends DifferentialDrive{
 			case kManual:
 				PIDDisable();
 				if(state.is_lowInputOn){
+					// 低出力モード
 					state.driveStraightSpeed *= 0.6;
 					state.driveRotateSpeed *= 0.6;
 				}
-				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed);
+				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed);	// Y方向のXBoxControllerのスティックの入力が直感と逆なので-をつける
 				break;
 
 			case kLineTrace:
+				PIDDisable();
 				//lineTrace();
 				break;
 
@@ -209,6 +211,14 @@ public class Drive extends DifferentialDrive{
 Drive(SpeedController leftMotor, SpeedController rightMotor, EncoderGroup e_drive, ADXRS450_Gyro g_drive)
 	DifferentialDrive要素のSpeedController、PIDSource用のEnocoderGroupとADXRS450_Gyroを受け取り、PIDControllerのインスタンスを作る
 
+
+applyState(State state)
+	stateから情報を受け取り入力する
+
+setSpeed(double straightSpeed, double rotateSpeed)
+	arcadeDrive()に代入する
+	足元を動かしたくないときは個々の処理をコメントアウトすればよい
+
 setRelativeStraightSetpoint(double setpoint)
 setRelativeTurnSetpoint(double setpoint)
 setRelativeSetpoint(double straightSetpoint, double turnSetpoint)
@@ -235,10 +245,10 @@ is_PIDEnabled()
 */
 /*メンバークラス---DrivePIDOutput　PIDOutput継承
   その関数 
-	DrivePIDOutput(PIDMode pidmode);
+	DrivePIDOutput(PIDMode pidmode)
 		PIDModeによって後述のpidWrite()の動作が変わる。
 
-	pidWrite(double output);
+	pidWrite(double output)
 		outputを受け取り処理して代入する。PIDModeによって代入対象が異なる。
 */
 

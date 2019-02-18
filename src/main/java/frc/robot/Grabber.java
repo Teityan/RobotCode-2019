@@ -10,9 +10,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Solenoid;
 
-/**
- * Add your docs here.
- */
 public class Grabber {
 
     private PWMSpeedController rollerMotor;
@@ -31,7 +28,6 @@ public class Grabber {
 	public void applyState(State state) {
         switch (state.cargoState) {
             case kHold:
-                releaseArm();
                 holdCargo();
                 break;
             
@@ -41,7 +37,6 @@ public class Grabber {
 
             case kDoNothing:
                 stopRoller();
-                releaseArm();
                 break;
             
             default:
@@ -49,15 +44,23 @@ public class Grabber {
         }
 
         if (state.is_toHoldPanel) {
-           holdPanel();    // パネルをつかむ
+            // パネルをつかむ
+           holdPanel();    
         } else {
-           releasePanel();    // パネルを離す
+            // パネルを離す
+           releasePanel();    
         }
 
+        
         if (state.is_toRetractArm) {
-            retractArm();    // アームをしまう
+            // アームをしまう
+            retractArm();   
+        } else if(state.is_autoClimbOn) {
+            // 自動クライム中はアームをしまう
+            retractArm();
         } else {
-            releaseArm();    // アームを出す
+            // アームを出す
+            releaseArm();    
         }
     }
     
@@ -105,6 +108,9 @@ public class Grabber {
     /*
     Grabber(Motor motor, Solenoid barSolenoid, Solenoid armSolenoid)
         モーターとソレノイドを受け取る
+
+    applyState()
+        Stateから情報を受け取り入力する
 
     holdCargo():
         モーターを回してCARGOを回収する

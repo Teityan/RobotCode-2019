@@ -76,10 +76,6 @@ public class Robot extends TimedRobot {
         return Math.abs(value) > Const.Deadband ? value : 0 ;
     }
 
-    /*
-     * ToDo: レファクタリング
-     *
-     */
     public double[] geLinePosition(double[] displayPosition) {
         double theta_c = Const.Theta_Camera_rad;    // カメラ自体の角度
         double theta_a = Const.Theta_Angle_rad;    // カメラの画角
@@ -120,11 +116,9 @@ public class Robot extends TimedRobot {
         driver = new XboxController(Const.DriveControllerPort);
         operator = new XboxController(Const.OperateControllerPort);
 
-
         // Motors
         driveRight = new Spark(Const.DriveRightPort);
         driveLeft = new Spark(Const.DriveLeftPort);
-    
 
         liftMotor = new Talon(Const.LiftMotorPort);
 
@@ -134,8 +128,8 @@ public class Robot extends TimedRobot {
 
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
         leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
-        driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);
-		driveEncoder.setDistancePerPulse(Const.DriveEncoderDistancePerPulse);
+        driveEncoder = new EncoderGroup(rightDriveEncoder, leftDriveEncoder);    // エンコーダをまとめる   
+        driveEncoder.setDistancePerPulse(Const.DriveEncoderDistancePerPulse);
 
 		liftEncoder = new Encoder(Const.LiftEncoderAPort, Const.LiftEncoderBPort);
 		liftEncoder.setDistancePerPulse(Const.LiftEncoderDistancePerPulse);
@@ -208,11 +202,13 @@ public class Robot extends TimedRobot {
         } else */{
             state.driveState = State.DriveState.kManual;
             state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
-            state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kLeft));
+            state.driveRotateSpeed = deadbandProcessing(driver.getX(Hand.kRight));
+
+            state.climbMotorSpeed = deadbandProcessing(driver.getY(Hand.kRight));
         }
 
         if(driver.getBumper(Hand.kLeft)) {
-            // 左のスティックのボタンが押されたら低出力モード
+            // 左のバンパーのボタンが押されたら低出力モード
             state.is_lowInputOn = true;
         }
 
@@ -275,9 +271,28 @@ public class Robot extends TimedRobot {
 
 		/**
 		 * Climb
+         * 
+         * クライムの流れ...
+         * StartButton : HABの上に乗るまでの処理
+         *    kDoNothing : kLiftUpと同じ。初期化した後はここからkLiftUpに行く。
+         *    kLiftUp    : リフトを枠の、止めるところの少し上へ上げる。
+         *    kLocking   : ストッパーを出す。ここでリフトが下がらないように維持する。
+         *            　   出す命令をしてから即座にリフトを下げると止めるところに引っかからない可能性があるので0.3秒置く
+         *   kAdvance    : リフトを下げて枠にひっかけてロボットを持ち上げる。
+         *                 ロボットを持ち上げるのには-1.0くらいの入力が必要だが、最初からそれを入れるとアームに負担がかかるので手動でゆっくり入力する。
+         *                 DriveBaseと枠についたモーターを動かして前に進み、HABに乗る。
+         *            　
+         * 
+         * BackButton : HABに乗っかった後の処理。本体が上に乗っかった後も枠がストッパーで下に押し付けられてるのでそれを外す。ストッパーがロックされてたら実行。
+         *   kDoNothing  : kLiftUpと同じ。初期化した後はここからkLiftUpに行く。
+         *   kLiftUp     : リフトを枠の、止めるところの少し上へ上げる。
+         *   kUnlocking  : ストッパーを外す。ここでリフトが下がらないように維持する。
+         *            　   外す命令をしてから即座にリフトを下げるとストッパーが外れない可能性があるので0.3秒置く。
+         *   kLiftDown   : リフトを自重で下げさせる。枠がHABの手前の壁に引っかかってるかもしれないのでdrvierの右のスティックで枠のモーターを動かす。
+         *   
+         * 
 		 */
         if(operator.getStartButton()) {
-			String message = new String();
 			// スタートボタン + A or Yでクライムを始める
 			state.is_autoClimbOn = true;
             switch(state.climbSequence) {
@@ -325,9 +340,9 @@ public class Robot extends TimedRobot {
                     state.climbMotorSpeed = state.driveStraightSpeed;
                     
                     if(state.liftSpeed == 0) {
+                    // 入力なければ維持　
                     state.liftSpeed = Const.KeepLiftHeightSpeed;
                     }
-					state.is_lockingClimb = true;
 					break; 
 
 				default:
@@ -336,7 +351,6 @@ public class Robot extends TimedRobot {
 
         } else if(operator.getBackButton() && state.is_lockedClimb) {
 			// 十分前に進んで後輪がHABに乗ったら実行
-
 			switch(state.climbSequence) {
                 case kDoNothing:
 				case kLiftUp:
@@ -350,8 +364,7 @@ public class Robot extends TimedRobot {
 						// StartとRightBumperでHABのLEVEL3までリフトを上げる
 						state.liftSetpoint = Const.HabThirdHeight;
 						state.is_liftPIDOn = true;
-					}
-					
+                    }
 
 					if(lift.is_PIDOnTarget()){
 						// 届いたらストッパーを外す
@@ -377,7 +390,6 @@ public class Robot extends TimedRobot {
 				case kLiftDown:
 					// リフトを下げる
                     state.liftSpeed = 0;
-                    state.climbMotorSpeed = deadbandProcessing(driver.getY(Hand.kRight));
 					break;
 				
 				default: 
@@ -388,8 +400,6 @@ public class Robot extends TimedRobot {
 			state.is_autoClimbOn = false;
             // 初期化
             state.climbSequence = State.ClimbSequence.kDoNothing;
-			state.is_lockingClimb = false;
-		    state.is_lockedClimb = false;
 		}
 
         /*
