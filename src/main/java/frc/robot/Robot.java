@@ -11,6 +11,7 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
@@ -18,8 +19,8 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.VictorSP;
 
 public class Robot extends TimedRobot {
     private State state;
@@ -30,8 +31,8 @@ public class Robot extends TimedRobot {
     // Motors
     private Spark driveLeft, driveRight;
     private Talon liftMotor;
-    private Talon rollerMotor;
-    private Talon climbMotor;
+    private VictorSP rollerMotor;
+    private VictorSP climbMotor;
 
     // Encoder, Gyro
     private Encoder rightDriveEncoder, leftDriveEncoder;
@@ -42,6 +43,9 @@ public class Robot extends TimedRobot {
     // Solenoid
     private Solenoid armSolenoid, barSolenoid;
     private Solenoid climbSolenoid;
+
+    // Compressor
+    private Compressor compressor;
 
     // Timer for climb
     private Timer climbTimer;
@@ -122,9 +126,9 @@ public class Robot extends TimedRobot {
 
         liftMotor = new Talon(Const.LiftMotorPort);
 
-        rollerMotor = new Talon(Const.RollerMotorPort);
+        rollerMotor = new VictorSP(Const.RollerMotorPort);
 
-        climbMotor = new Talon(Const.ClimbMotorPort);
+        climbMotor = new VictorSP(Const.ClimbMotorPort);
 
         rightDriveEncoder = new Encoder(Const.RightDriveEncoderAPort, Const.RightDriveEncoderBPort);
         leftDriveEncoder = new Encoder(Const.LeftDriveEncoderAPort, Const.LeftDriveEncoderBPort);
@@ -141,6 +145,9 @@ public class Robot extends TimedRobot {
         barSolenoid = new Solenoid(Const.BarSolenoidPort);
 
         climbSolenoid = new Solenoid(Const.ClimbSolenoidPort);
+
+        // Compressor
+        compressor = new Compressor();
 
         // Sensor
         //rightFrontSensor = new AnalogInput(Const.RightFrontSensorPort);
@@ -180,6 +187,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        state.is_lockingClimb = false;
     }
   
     @Override
@@ -322,7 +330,7 @@ public class Robot extends TimedRobot {
 
 				case kLocking:
 					// ストッパーを出す
-					state.is_lockingClimb = true;
+                    state.is_lockingClimb = true;
 					
 					// リフトが下がらないように維持する
 					state.liftSpeed = Const.KeepLiftHeightSpeed;
@@ -343,6 +351,9 @@ public class Robot extends TimedRobot {
                     // 入力なければ維持　
                     state.liftSpeed = Const.KeepLiftHeightSpeed;
                     }
+
+                    // コンプレッサーを止めてできるだけ負担を減らす。
+                    compressor.stop();
 					break; 
 
 				default:
@@ -400,6 +411,7 @@ public class Robot extends TimedRobot {
 			state.is_autoClimbOn = false;
             // 初期化
             state.climbSequence = State.ClimbSequence.kDoNothing;
+            compressor.start();
 		}
 
         /*

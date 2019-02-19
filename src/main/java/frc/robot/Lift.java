@@ -72,7 +72,7 @@ public class Lift {
     Lift(Talon liftMotor, Encoder encoder) {
         this.encoder = encoder;
         this.liftMotor = liftMotor;
-        this.motor = new PIDMotor(liftMotor , this);
+        this.motor = new PIDMotor();
         this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, motor);
         pid.setAbsoluteTolerance(Const.LiftPIDTolearnce);
     }
@@ -143,18 +143,11 @@ public class Lift {
         SmartDashboard.putNumber("pid.getD()", pid.getD());
 
     }
-}
-class PIDMotor implements PIDOutput {
-    
-    public Talon motor;
-    public Lift lift;
 
-    public PIDMotor(Talon motor, Lift lift) {
-        this.motor = motor;
-        this.lift = lift;
-    }
-
-    public void pidWrite(double output) {
-        lift.setSpeed(output);
+    class PIDMotor implements PIDOutput {
+        public void pidWrite(double output) {
+            // setSpeedを通すため
+            setSpeed(output);
+        }
     }
 }

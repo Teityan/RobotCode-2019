@@ -7,19 +7,19 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.PWMSpeedController;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.VictorSP;
 
 public class Grabber {
 
-    private PWMSpeedController rollerMotor;
+    private VictorSP rollerMotor;
     private Solenoid barSolenoid;
     private Solenoid armSolenoid;
 
     private boolean is_RollerMoving = false;
 
 
-    Grabber(PWMSpeedController rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
+    Grabber(VictorSP rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
         this.rollerMotor = rollerMotor;
         this.barSolenoid = barSolenoid;
         this.armSolenoid = armSolenoid;

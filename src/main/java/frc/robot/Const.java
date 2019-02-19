@@ -53,7 +53,7 @@ public class Const {
 	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch + slightAdjustment;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
 	public static final double ShipCargoHeight = 40 * CmPerInch + slightAdjustment;
 	public static final double HabSecondHeight = 60;	
-	public static final double HabThirdHeight = 90;	
+	public static final double HabThirdHeight = 125;	
 	public static final double GroundHeight = 0;
 
 
