@@ -47,8 +47,8 @@ public class Drive extends DifferentialDrive{
 		switch(state.driveState) {
 			case kManual:
 				PIDDisable();
-				if(state.is_lowInputOn){
-					// 低出力モード
+				if((state.is_lowInputOn || state.is_liftPIDOn || state.is_autoClimbOn) && state.liftSetpoint != Const.LaunchCargoHeight) {
+					// ボタンを入力しているかリフトをPID制御しているときは低出力モード
 					state.driveStraightSpeed *= 0.6;
 					state.driveRotateSpeed *= 0.6;
 				}
@@ -56,7 +56,7 @@ public class Drive extends DifferentialDrive{
 				break;
 
 			case kLineTrace:
-				PIDDisable();
+				//PIDDisable();
 				//lineTrace();
 				break;
 
@@ -217,7 +217,7 @@ applyState(State state)
 
 setSpeed(double straightSpeed, double rotateSpeed)
 	arcadeDrive()に代入する
-	足元を動かしたくないときは個々の処理をコメントアウトすればよい
+	足元を動かしたくないときはここの処理をコメントアウトすればよい
 
 setRelativeStraightSetpoint(double setpoint)
 setRelativeTurnSetpoint(double setpoint)

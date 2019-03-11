@@ -146,6 +146,11 @@ public class Lift {
 
     class PIDMotor implements PIDOutput {
         public void pidWrite(double output) {
+            if(output < 0){
+                //急激にリフトが下がるのを防ぐ
+                output = 0;
+            }
+
             // setSpeedを通すため
             setSpeed(output);
         }

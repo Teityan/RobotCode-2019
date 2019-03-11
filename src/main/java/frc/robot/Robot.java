@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
     //                  leftBackSensor;
 
     // Camera
-    private CameraServer camera;
+    private CameraServer elevatorCamera, frameCamera;
 
     // NetWorkTable
     private NetworkTable networkTable;
@@ -160,9 +160,12 @@ public class Robot extends TimedRobot {
         climbTimer = new Timer();
 
         // Camera
-        camera = CameraServer.getInstance();
-        camera.startAutomaticCapture();
+        elevatorCamera = CameraServer.getInstance();
+        elevatorCamera.startAutomaticCapture(0);
 
+        frameCamera = CameraServer.getInstance();
+        frameCamera.startAutomaticCapture(1);
+        
         // NetworkTable
         //networkTable = networkTable.getSubTable(Const.LineFindNetworkTable);
 
@@ -187,7 +190,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        state.is_lockingClimb = false;
     }
   
     @Override
@@ -224,6 +226,10 @@ public class Robot extends TimedRobot {
         /**
          * Liftは全てoperatorが操作する
          */
+        if(operator.getTriggerAxis(Hand.kLeft) > Const.Deadband){
+            state.liftSetpoint = Const.LaunchCargoHeight;
+            state.is_liftPIDOn = true;
+        }else
         if (operator.getYButton()) {
             // YでRocketの二段目のCargo
             state.liftSetpoint = Const.RocketSecondCargoHeight;
@@ -347,11 +353,6 @@ public class Robot extends TimedRobot {
                     state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
                     state.climbMotorSpeed = state.driveStraightSpeed;
                     
-                    if(state.liftSpeed == 0) {
-                    // 入力なければ維持　
-                    state.liftSpeed = Const.KeepLiftHeightSpeed;
-                    }
-
                     // コンプレッサーを止めてできるだけ負担を減らす。
                     compressor.stop();
 					break; 

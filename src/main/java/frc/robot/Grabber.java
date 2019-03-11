@@ -17,6 +17,7 @@ public class Grabber {
     private Solenoid armSolenoid;
 
     private boolean is_RollerMoving = false;
+    private boolean is_retractingArm = false;
 
 
     Grabber(VictorSP rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
@@ -26,6 +27,21 @@ public class Grabber {
     }
     
 	public void applyState(State state) {
+
+        if (state.is_toRetractArm) {
+            // アームをしまう
+            retractArm();   
+            setRollerSpeed(0.3);
+        } else if(state.is_autoClimbOn) {
+            // 自動クライム中はアームをしまう
+            retractArm();
+            stopRoller();
+        } else {
+            // アームを出す
+            releaseArm();  
+            stopRoller();  
+        }
+        
         switch (state.cargoState) {
             case kHold:
                 holdCargo();
@@ -36,7 +52,12 @@ public class Grabber {
                 break;
 
             case kDoNothing:
+            /*
+                if(is_retractingArm) {
+                    setRollerSpeed(1.0);
+                }else {
                 stopRoller();
+                }*/
                 break;
             
             default:
@@ -52,16 +73,7 @@ public class Grabber {
         }
 
         
-        if (state.is_toRetractArm) {
-            // アームをしまう
-            retractArm();   
-        } else if(state.is_autoClimbOn) {
-            // 自動クライム中はアームをしまう
-            retractArm();
-        } else {
-            // アームを出す
-            releaseArm();    
-        }
+        
     }
     
     public void holdCargo() {
@@ -97,11 +109,13 @@ public class Grabber {
     }
 
     public void retractArm() {
-        armSolenoid.set(false);   
+        armSolenoid.set(false); 
+        is_retractingArm = true;  
     }
 
     public void releaseArm() {
         armSolenoid.set(true);    
+        is_retractingArm = false;
     }
 
 
