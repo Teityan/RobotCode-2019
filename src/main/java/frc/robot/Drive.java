@@ -76,8 +76,8 @@ public class Drive extends DifferentialDrive{
 		rotateSpeed *= is_lowInputOn ? 0.6 : 1;
 
 		// 加速度制限
-		straightOutput = limitAcceleraton(preStraightOutput, straightOutput);
-		rotateOutput = limitAcceleraton(preRotateOutput, rotateOutput);
+		straightOutput = limitAcceleration(preStraightOutput, straightOutput);
+		rotateOutput = limitAcceleration(preRotateOutput, rotateOutput);
 
 		preStraightOutput = straightOutput;
 		preRotateOutput = rotateOutput;
@@ -161,7 +161,7 @@ public class Drive extends DifferentialDrive{
 		rotateController.setD(d);
 	}
 
-	private double limitAcceleraton(double preOutput, double output) {
+	private double limitAcceleration(double preOutput, double output) {
 		double accelration = (output - preOutput) / Const.PIDPeriod;
 		if(accelration * preOutput < 0) {
 			// 0へ向かう加速度だったらそのまま
