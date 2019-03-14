@@ -75,6 +75,12 @@ public class Drive extends DifferentialDrive{
 		straightSpeed *= is_lowInputOn ? 0.6 : 1;
 		rotateSpeed *= is_lowInputOn ? 0.6 : 1;
 
+		// 加速度制限
+		straightOutput = limitAcceleraton(preStraightOutput, straightOutput);
+		rotateOutput = limitAcceleraton(preRotateOutput, rotateOutput);
+
+		preStraightOutput = straightOutput;
+		preRotateOutput = rotateOutput;
 		
 		arcadeDrive(straightSpeed, rotateSpeed);
 	}
@@ -156,11 +162,15 @@ public class Drive extends DifferentialDrive{
 	}
 
 	private double limitAcceleraton(double preOutput, double output) {
-		if(preOutput == output) return output;
 		double accelration = (output - preOutput) / Const.PIDPeriod;
-		double Output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+		if(accelration * preOutput < 0) {
+			// 0へ向かう加速度だったらそのまま
+			return output;
+		}
 
-		return Math.min(1.0, Math.max(Output, -1.0));
+		output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+
+		return Math.min(1.0, Math.max(output, -1.0));
 	}
     
     public void printVariables() {
@@ -199,13 +209,6 @@ public class Drive extends DifferentialDrive{
 			case Default:
 			default:
 			}
-
-			// 加速度制限
-			straightOutput = limitAcceleraton(preStraightOutput, straightOutput);
-			rotateOutput = limitAcceleraton(preRotateOutput, rotateOutput);
-
-			preStraightOutput = straightOutput;
-			preRotateOutput = rotateOutput;
 
 			// Straightは前向きがマイナス
 			setSpeed(-straightOutput, rotateOutput);			
