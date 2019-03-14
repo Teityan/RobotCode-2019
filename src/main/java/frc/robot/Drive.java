@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Drive extends DifferentialDrive{
 
-    enum PIDMode {
+    private enum PIDMode {
 		Straight, Rotate, Default
 	};
 
@@ -47,12 +47,8 @@ public class Drive extends DifferentialDrive{
 		switch(state.driveState) {
 			case kManual:
 				PIDDisable();
-				if((state.is_lowInputOn || state.is_liftPIDOn || state.is_autoClimbOn) && state.liftSetpoint != Const.LaunchCargoHeight) {
-					// ボタンを入力しているかリフトをPID制御しているときは低出力モード
-					state.driveStraightSpeed *= 0.6;
-					state.driveRotateSpeed *= 0.6;
-				}
-				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed);	// Y方向のXBoxControllerのスティックの入力が直感と逆なので-をつける
+				// Y方向のXBoxControllerのスティックの入力が直感と逆なので-をつける
+				setSpeed(-state.driveStraightSpeed, state.driveRotateSpeed, state.is_lowInputOn);	
 				break;
 
 			case kLineTrace:
@@ -70,39 +66,48 @@ public class Drive extends DifferentialDrive{
 		}
 	}
 
-	public void setSpeed(double straightSpeed,double rotateSpeed) {
+	private void setSpeed(double straightSpeed, double rotateSpeed){
+		setSpeed(straightSpeed, rotateSpeed, false);
+	}
+
+	private void setSpeed(double straightSpeed, double rotateSpeed, boolean is_lowInputOn) {
+		//低出力モード
+		straightSpeed *= is_lowInputOn ? 0.6 : 1;
+		rotateSpeed *= is_lowInputOn ? 0.6 : 1;
+
+		
 		arcadeDrive(straightSpeed, rotateSpeed);
 	}
 	
 
-	public void setRelativeStraightSetpoint(double setpoint) {
+	private void setRelativeStraightSetpoint(double setpoint) {
 		setRelativeSetpoint(e_drive.getDistance() + setpoint, g_drive.getAngle());
 	}
 
-	public void setRelativeTurnSetpoint(double setpoint) {
+	private void setRelativeTurnSetpoint(double setpoint) {
 		setRelativeSetpoint(e_drive.getDistance(), g_drive.getAngle() + setpoint);
 	}
 
-	public void setRelativeSetpoint(double straightSetpoint, double turnSetpoint) {
+	private void setRelativeSetpoint(double straightSetpoint, double turnSetpoint) {
 		straightController.setSetpoint(e_drive.getDistance() + straightSetpoint);
 		rotateController.setSetpoint(g_drive.getAngle() + turnSetpoint);
     }
     
-    public void setStraightSetpoint(double straightSetpoint) {
+    private void setStraightSetpoint(double straightSetpoint) {
         setSetpoint(straightSetpoint, 0);
     }
 
-    public void setTurnSetpoint(double turnSetpoint) {
+    private void setTurnSetpoint(double turnSetpoint) {
         setSetpoint(0, turnSetpoint);
     }
 
-    public void setSetpoint(double straightSetpoint, double turnSetpoint) {
+    private void setSetpoint(double straightSetpoint, double turnSetpoint) {
         straightController.setSetpoint(straightSetpoint);
 		rotateController.setSetpoint(turnSetpoint);
     }
 
 
-	public void PIDEnable() {
+	private void PIDEnable() {
 		if (!straightController.isEnabled()) {
 			straightController.enable();
 		}
@@ -111,7 +116,7 @@ public class Drive extends DifferentialDrive{
 		}
 	}
 
-	public void PIDDisable() {
+	private void PIDDisable() {
 		if (straightController.isEnabled()) {
 			straightController.disable();
 			straightController.reset();
@@ -122,7 +127,7 @@ public class Drive extends DifferentialDrive{
 		}
 	}
 
-	public boolean is_PIDEnabled() {
+	private boolean is_PIDEnabled() {
 		return straightController.isEnabled() && rotateController.isEnabled();
 	}
 		
@@ -148,6 +153,14 @@ public class Drive extends DifferentialDrive{
 
 	public void setRotateD(double d) {
 		rotateController.setD(d);
+	}
+
+	private double limitAcceleraton(double preOutput, double output) {
+		if(preOutput == output) return output;
+		double accelration = (output - preOutput) / Const.PIDPeriod;
+		double Output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+
+		return Math.min(1.0, Math.max(Output, -1.0));
 	}
     
     public void printVariables() {
@@ -186,22 +199,18 @@ public class Drive extends DifferentialDrive{
 			case Default:
 			default:
 			}
-			straightOutput = LimitAcceleraton(preStraightOutput, straightOutput);
-			rotateOutput = LimitAcceleraton(preRotateOutput, rotateOutput);
 
-			setSpeed(-straightOutput, rotateOutput);
+			// 加速度制限
+			straightOutput = limitAcceleraton(preStraightOutput, straightOutput);
+			rotateOutput = limitAcceleraton(preRotateOutput, rotateOutput);
 
 			preStraightOutput = straightOutput;
 			preRotateOutput = rotateOutput;
+
+			// Straightは前向きがマイナス
+			setSpeed(-straightOutput, rotateOutput);			
 		}
 
-		private double LimitAcceleraton(double preOutput, double output ) {
-			if(preOutput == output) return output;
-			double accelration = (output - preOutput) / Const.PIDPeriod;
-			double Output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
-			
-			return Math.min(1.0, Math.max(Output, -1.0));
-		}
 	}
 
 

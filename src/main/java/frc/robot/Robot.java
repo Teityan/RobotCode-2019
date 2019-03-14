@@ -227,25 +227,29 @@ public class Robot extends TimedRobot {
          * Liftは全てoperatorが操作する
          */
         if(operator.getTriggerAxis(Hand.kLeft) > Const.Deadband){
+            // LeftTriggerでカーゴを打ち出す
             state.liftSetpoint = Const.LaunchCargoHeight;
             state.is_liftPIDOn = true;
-        }else
-        if (operator.getYButton()) {
+        }else if (operator.getYButton()) {
             // YでRocketの二段目のCargo
             state.liftSetpoint = Const.RocketSecondCargoHeight;
             state.is_liftPIDOn = true;
+            state.is_lowInputOn = true;
         } else if (operator.getAButton()) {
             // AでRocketの一段目のCargo
             state.liftSetpoint = Const.RocketFirstCargoHeight;
             state.is_liftPIDOn = true;
+            state.is_lowInputOn = true;
         } else if (operator.getBButton()) {
             // BでRocketCargo ShipのCargo
             state.liftSetpoint = Const.ShipCargoHeight;
             state.is_liftPIDOn = true;
+            state.is_lowInputOn = true;
         } else if (operator.getXButton()) {
             // XでRocketのの２段目のHatch
             state.liftSetpoint = Const.RocketSecondHatchHeight;
             state.is_liftPIDOn = true;
+            state.is_lowInputOn = true;
         }else {
             // それ以外の場合は手動操作
             state.liftSpeed = deadbandProcessing(-operator.getY(Hand.kLeft));
@@ -308,7 +312,8 @@ public class Robot extends TimedRobot {
 		 */
         if(operator.getStartButton()) {
 			// スタートボタン + A or Yでクライムを始める
-			state.is_autoClimbOn = true;
+            state.is_autoClimbOn = true;
+            state.is_lowInputOn = true;
             switch(state.climbSequence) {
 				case kDoNothing:
 				case kLiftUp:
