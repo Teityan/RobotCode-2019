@@ -100,7 +100,7 @@ public class Const {
 	public static final double LiftKd = 0;
 
 	// Constants for limitting acceleration
-	public static final double PIDPeriod = 0.05;
+	public static final double PIDLoopPeriod = 0.05;
 	public static final double maxAcceleration = 0.5;
 
 	//Constants for getting distance to the line

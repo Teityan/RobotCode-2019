@@ -162,15 +162,22 @@ public class Drive extends DifferentialDrive{
 	}
 
 	private double limitAcceleration(double preOutput, double output) {
-		double accelration = (output - preOutput) / Const.PIDPeriod;
-		if(accelration * preOutput < 0) {
-			// 0へ向かう加速度だったらそのまま
+		if(preOutput == output) {
+			// 0除算回避
 			return output;
 		}
 
-		output = preOutput + Math.min(accelration, Const.maxAcceleration) * Const.PIDPeriod;
+		double acceleration = (output - preOutput) / Const.PIDLoopPeriod;
+		if(acceleration * preOutput < 0 && acceleration * output < 0) {
+			// 0へ向かう加速度だったらそのまま
+			return output;
+		}
+		// 制限
+		acceleration =  Math.signum(acceleration) * Math.min(Math.abs(acceleration), Const.maxAcceleration);
 
-		return Math.min(1.0, Math.max(output, -1.0));
+		output = preOutput + acceleration * Const.PIDLoopPeriod;
+
+		return output;
 	}
     
     public void printVariables() {
