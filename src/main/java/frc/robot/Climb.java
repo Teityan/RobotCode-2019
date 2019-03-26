@@ -13,15 +13,15 @@ public class Climb {
         this.climbSolenoid = climbSolenoid;
     }
 
-    public void climbAdvance(double speed){
+    private void climbAdvance(double speed){
         climbMotor.setSpeed(speed);
     }
 
-    public void climbLockStopper(){
+    private void climbLockStopper(){
         climbSolenoid.set(true);      
     }
 
-    public void climbUnlockStopper(){
+    private void climbUnlockStopper(){
         climbSolenoid.set(false);
     }
 

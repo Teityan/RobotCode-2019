@@ -45,13 +45,13 @@ public class Const {
 		everything in cm
 	 */
 	private static final double CmPerInch = 2.54;
-	private static final double slightAdjustment = 10;	// 高さの微調整
+	private static final double HeightAdjustment = 10;	// 高さの微調整
 
 	// 「カーゴを下に落ちないようにする板」を基準とした高さにする。 
-	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch - slightAdjustment;
-	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch - slightAdjustment;
-	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch + slightAdjustment;	//Hatch用の棒が18.3inの高さにあるのでその分マイナスする 
-	public static final double ShipCargoHeight = 40 * CmPerInch + slightAdjustment;
+	public static final double RocketFirstCargoHeight = 26.8 * CmPerInch - HeightAdjustment;
+	public static final double RocketSecondCargoHeight = 54.8 * CmPerInch - HeightAdjustment;
+	public static final double RocketSecondHatchHeight = 46.3 * CmPerInch - 18.3 * CmPerInch + HeightAdjustment;	//Hatch用の棒が18.3inchの高さにあるのでその分マイナスする 
+	public static final double ShipCargoHeight = 40 * CmPerInch + HeightAdjustment;
 	public static final double HabSecondHeight = 60;	
 	public static final double HabThirdHeight = 125;	
 	public static final double GroundHeight = 0;
@@ -68,6 +68,8 @@ public class Const {
 	public static final double LiftPIDTolearnce = 5;	// LiftのPIDOnTargetの許容範囲
 
 	public static final double KeepLiftHeightSpeed = 0.3;
+
+	public static final double KeepHoldingCargoSpeed = 0.3;
 	
 	// NetworkTable for finding lines
 	public static final String LineFindNetworkTable = "";

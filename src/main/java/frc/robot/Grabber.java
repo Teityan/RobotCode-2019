@@ -17,7 +17,7 @@ public class Grabber {
     private Solenoid armSolenoid;
 
     private boolean is_RollerMoving = false;
-    private boolean is_retractingArm = false;
+    private boolean is_retractingArm = true;
 
 
     Grabber(VictorSP rollerMotor, Solenoid barSolenoid, Solenoid armSolenoid) {
@@ -27,11 +27,11 @@ public class Grabber {
     }
     
 	public void applyState(State state) {
-
+ 
         if (state.is_toRetractArm) {
             // アームをしまう
             retractArm();   
-            setRollerSpeed(0.3);
+            //setRollerSpeed(Const.KeepHoldingCargoSpeed);
         } else if(state.is_autoClimbOn) {
             // 自動クライム中はアームをしまう
             retractArm();
@@ -41,7 +41,7 @@ public class Grabber {
             releaseArm();  
             stopRoller();  
         }
-        
+
         switch (state.cargoState) {
             case kHold:
                 holdCargo();
@@ -52,12 +52,12 @@ public class Grabber {
                 break;
 
             case kDoNothing:
-            /*
-                if(is_retractingArm) {
-                    setRollerSpeed(1.0);
+        
+                if(is_retractingArm() && !state.is_autoClimbOn) {
+                    setRollerSpeed(Const.KeepHoldingCargoSpeed);
                 }else {
-                stopRoller();
-                }*/
+                    stopRoller();
+                }
                 break;
             
             default:
@@ -73,25 +73,24 @@ public class Grabber {
         }
 
         
-        
     }
     
-    public void holdCargo() {
-        rollerMotor.set(1.0);   
+    private void holdCargo() {
+        setRollerSpeed(1.0);   
         is_RollerMoving = true;
     }
 
-    public void releaseCargo() {
-        rollerMotor.set(-1.0);    
+    private void releaseCargo() {
+        setRollerSpeed(-1.0);    
         is_RollerMoving = true;
     }
 
-    public void stopRoller() {
+    private void stopRoller() {
         rollerMotor.stopMotor();
         is_RollerMoving = false;
     }
 
-    public void setRollerSpeed(double speed) {
+    private void setRollerSpeed(double speed) {
         rollerMotor.set(speed);
         is_RollerMoving = true;
     }
@@ -100,22 +99,26 @@ public class Grabber {
         return is_RollerMoving;
     }
 
-    public void holdPanel() {
+    private void holdPanel() {
         barSolenoid.set(false);   
     }
 
-    public void releasePanel() {
+    private void releasePanel() {
         barSolenoid.set(true);   
     }
 
-    public void retractArm() {
+    private void retractArm() {
         armSolenoid.set(false); 
         is_retractingArm = true;  
     }
 
-    public void releaseArm() {
+    private void releaseArm() {
         armSolenoid.set(true);    
         is_retractingArm = false;
+    }
+
+    public boolean is_retractingArm(){
+        return is_retractingArm;
     }
 
 

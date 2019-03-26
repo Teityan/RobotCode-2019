@@ -74,12 +74,12 @@ public class Lift {
         this.liftMotor = liftMotor;
         this.motor = new PIDMotor();
         this.pid = new PIDController(Const.LiftKp, Const.LiftKi, Const.LiftKd, encoder, motor);
+        // 目標値にあるか判断するときの許容範囲
         pid.setAbsoluteTolerance(Const.LiftPIDTolearnce);
+        // マイナス入力を消して急激にリフトが下がるのを防ぐ
+        pid.setOutputRange(0, 1.0);
     }
 
-	/**
-	 * ToDo
-	 */
 	public void applyState(State state) {
         // PIDが有効か調べる
         if(state.is_liftPIDOn){
@@ -125,15 +125,11 @@ public class Lift {
     }
 
     public boolean is_PIDOnTarget() {
-        if(!(pid.getSetpoint() == 0)){
-            if(pid.isEnabled()) {
-                return pid.onTarget();
-            }
+        if(pid.getSetpoint() != 0 && pid.isEnabled()){
+             // PIDがEnableまたはSetpointが0だったら判断しない
+            return pid.onTarget();
         }
-        // PIDがEnableにされてなかったら判断しない
-        // PIDのSetpointが0だったら判断しない
         return false;
-        
     }
 
     public void printVariables() {
@@ -146,11 +142,6 @@ public class Lift {
 
     class PIDMotor implements PIDOutput {
         public void pidWrite(double output) {
-            if(output < 0){
-                //急激にリフトが下がるのを防ぐ
-                output = 0;
-            }
-
             // setSpeedを通すため
             setSpeed(output);
         }

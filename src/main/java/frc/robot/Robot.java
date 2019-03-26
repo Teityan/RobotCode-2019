@@ -10,7 +10,7 @@ package frc.robot;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogInput;
+//import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -79,7 +79,7 @@ public class Robot extends TimedRobot {
     private double deadbandProcessing(double value) {
         return Math.abs(value) > Const.Deadband ? value : 0 ;
     }
-
+    /*
     public double[] geLinePosition(double[] displayPosition) {
         double theta_c = Const.Theta_Camera_rad;    // カメラ自体の角度
         double theta_a = Const.Theta_Angle_rad;    // カメラの画角
@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
 
         return result;
     }  
-  
+    */
     @Override
     public void robotInit() {
         // Controller
@@ -227,7 +227,7 @@ public class Robot extends TimedRobot {
          * Liftは全てoperatorが操作する
          */
         if(operator.getTriggerAxis(Hand.kLeft) > Const.Deadband){
-            // LeftTriggerでカーゴを打ち出す
+            // LeftTriggerでCargoをロボットの外に出す
             state.liftSetpoint = Const.LaunchCargoHeight;
             state.is_liftPIDOn = true;
         }else if (operator.getYButton()) {
@@ -310,6 +310,7 @@ public class Robot extends TimedRobot {
          *   
          * 
 		 */
+
         if(operator.getStartButton()) {
 			// スタートボタン + A or Yでクライムを始める
             state.is_autoClimbOn = true;
@@ -367,6 +368,7 @@ public class Robot extends TimedRobot {
 			}
 
         } else if(operator.getBackButton() && state.is_lockedClimb) {
+            state.is_lowInputOn = true;
 			// 十分前に進んで後輪がHABに乗ったら実行
 			switch(state.climbSequence) {
                 case kDoNothing:
