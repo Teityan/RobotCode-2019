@@ -47,6 +47,7 @@ public class State {
     public CargoState cargoState;    // カーゴをどうするか  
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
     public boolean is_toRetractArm;    //  アームをしまうかどうか
+    public boolean is_cargoHold;
 
     // Climb
     public ClimbSequence climbSequence = ClimbSequence.kDoNothing;    //    自動クライムの状態
@@ -54,6 +55,8 @@ public class State {
     public boolean is_lockingClimb;    // ストッパーを出すかどうか
     public boolean is_lockedClimb;    //ストッパーが完全に出されたかどうか
     public double climbMotorSpeed;    // クライムの時の後輪のモーターの値
+    public boolean is_climbUp;
+    public boolean is_startCounting;
 
     public State() {
         stateInit();
@@ -76,12 +79,14 @@ public class State {
 
         // Grabber
         cargoState = CargoState.kDoNothing;
-        is_toHoldPanel = false;
+        is_toHoldPanel = true;
         is_toRetractArm = false;
+        is_cargoHold = false;
    
         // Climb
         is_autoClimbOn = false;
         climbMotorSpeed = 0;
+        is_startCounting = false;
     }
 
     public void printVariables() {

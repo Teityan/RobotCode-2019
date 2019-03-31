@@ -39,6 +39,9 @@ public class Const {
 	public static final int RightBackSensorPort = 0;
 	public static final int LeftFrontSensorPort = 0;
 	public static final int LeftBackSensorPort = 0;
+
+	// cargo
+	public static final int cargoSenosorPort = 6;
 	
 	/**
 		Field Dimension	

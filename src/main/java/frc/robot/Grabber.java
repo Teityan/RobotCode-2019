@@ -9,6 +9,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Grabber {
 
@@ -27,24 +28,25 @@ public class Grabber {
     }
     
 	public void applyState(State state) {
- 
+        
         if (state.is_toRetractArm) {
             // アームをしまう
             retractArm();   
-            //setRollerSpeed(Const.KeepHoldingCargoSpeed);
-        } else if(state.is_autoClimbOn) {
-            // 自動クライム中はアームをしまう
-            retractArm();
-            stopRoller();
+            setRollerSpeed(Const.KeepHoldingCargoSpeed);
         } else {
             // アームを出す
             releaseArm();  
             stopRoller();  
         }
 
+        
         switch (state.cargoState) {
             case kHold:
-                holdCargo();
+                if(state.is_cargoHold){
+                    setRollerSpeed(Const.KeepHoldingCargoSpeed);
+                } else {
+                    holdCargo();
+                }
                 break;
             
             case kRelease:
@@ -53,7 +55,7 @@ public class Grabber {
 
             case kDoNothing:
         
-                if(is_retractingArm() && !state.is_autoClimbOn) {
+                if(is_retractingArm() && state.is_cargoHold) {
                     setRollerSpeed(Const.KeepHoldingCargoSpeed);
                 }else {
                     stopRoller();
@@ -81,7 +83,7 @@ public class Grabber {
     }
 
     private void releaseCargo() {
-        setRollerSpeed(-1.0);    
+        setRollerSpeed(-1.0);
         is_RollerMoving = true;
     }
 

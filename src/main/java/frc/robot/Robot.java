@@ -7,11 +7,15 @@
 
 package frc.robot;
 
+import edu.wpi.cscore.CameraServerJNI;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 //import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
@@ -19,6 +23,7 @@ import edu.wpi.first.wpilibj.Talon;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -48,13 +53,15 @@ public class Robot extends TimedRobot {
     private Compressor compressor;
 
     // Timer for climb
-    private Timer climbTimer;
+    private Timer climbTimer, backTimer;
 
     // SubModule
     private Drive drive;
     private Lift lift;
     private Grabber grabber;
     private Climb climb;
+
+    private DigitalInput cargoSensor;
 
     // ライントレース用のセンサー　
     // 0～3.3V 白線があると電圧が上がる 
@@ -155,16 +162,17 @@ public class Robot extends TimedRobot {
         //leftFrontSensor = new AnalogInput(Const.LeftFrontSensorPort);
         //leftBackSensor = new AnalogInput(Const.LeftBackSensorPort);
         //
+        cargoSensor = new DigitalInput(Const.cargoSenosorPort);
 
         // Climb Timer
         climbTimer = new Timer();
 
+        
         // Camera
         elevatorCamera = CameraServer.getInstance();
-        elevatorCamera.startAutomaticCapture(0);
-
+        elevatorCamera.startAutomaticCapture("ElevatorCamera", 0);
         frameCamera = CameraServer.getInstance();
-        frameCamera.startAutomaticCapture(1);
+        frameCamera.startAutomaticCapture("FrameCamera", 1);
         
         // NetworkTable
         //networkTable = networkTable.getSubTable(Const.LineFindNetworkTable);
@@ -261,6 +269,12 @@ public class Robot extends TimedRobot {
          * Cargoを掴む部分
          * driverが操作する
          */
+        if(!cargoSensor.get()) {
+            state.is_cargoHold = true;
+        } else {
+            state.is_cargoHold = false;
+        }
+
         if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
             // Right Triggerで掴む
             state.cargoState = State.CargoState.kHold;
@@ -273,11 +287,11 @@ public class Robot extends TimedRobot {
         }
 
         if (driver.getBumper(Hand.kRight)) {
-            // RightBumperボタンでパネルを掴む（掴むところが広がる）
-            state.is_toHoldPanel = true;
-        } else {
-            // 普段は縮まっている
+            // RightBumperで掴むところが縮む。
             state.is_toHoldPanel = false;
+        } else {
+            // 普段は掴むところが広がっている
+            state.is_toHoldPanel = true;
         }
 
         if (operator.getBumper(Hand.kLeft)) {
@@ -329,7 +343,7 @@ public class Robot extends TimedRobot {
 					}else{
 						//コマンドがなかったら抜ける
 						break;
-					}
+                    }
 					
                     if(lift.is_PIDOnTarget()) {
 						// 届いたらストッパーを出す
@@ -347,17 +361,26 @@ public class Robot extends TimedRobot {
 					// リフトが下がらないように維持する
 					state.liftSpeed = Const.KeepLiftHeightSpeed;
 
+                  
+
                     if(climbTimer.get() > 0.3) {
 						// 時間がたったら前に進む
 						state.climbSequence = State.ClimbSequence.kAdvance;
-						state.is_lockedClimb = true;
+                        state.is_lockedClimb = true;
+                        climbTimer.reset();
+						climbTimer.start();
                     }
                     break;
                 
 				case kAdvance:
                     // スティックで前に進む
+                     
                     state.driveStraightSpeed = deadbandProcessing(driver.getY(Hand.kLeft));
+                    
                     state.climbMotorSpeed = state.driveStraightSpeed;
+
+                                        
+                    // コントローラー操作にてリフトを下げる。
                     
                     // コンプレッサーを止めてできるだけ負担を減らす。
                     compressor.stop();
@@ -372,7 +395,8 @@ public class Robot extends TimedRobot {
 			// 十分前に進んで後輪がHABに乗ったら実行
 			switch(state.climbSequence) {
                 case kDoNothing:
-				case kLiftUp:
+                case kLiftUp:
+                    /*
 					// 乗っかったら後処理
 					// リフトを上げる
 					if(operator.getTriggerAxis(Hand.kRight) > Const.Deadband) {
@@ -381,8 +405,8 @@ public class Robot extends TimedRobot {
 						state.is_liftPIDOn = true;
 					}else if(operator.getBumper(Hand.kRight)) {
 						// StartとRightBumperでHABのLEVEL3までリフトを上げる
-						state.liftSetpoint = Const.HabThirdHeight;
-						state.is_liftPIDOn = true;
+						// state.liftSetpoint = Const.HabThirdHeight;
+						// state.is_liftPIDOn = false;
                     }
 
 					if(lift.is_PIDOnTarget()){
@@ -390,7 +414,13 @@ public class Robot extends TimedRobot {
 						state.climbSequence = State.ClimbSequence.kUnlocking;
 						climbTimer.reset();
 						climbTimer.start();
-					}	
+                    }	*/
+
+                    state.liftSetpoint = Const.LaunchCargoHeight + 5;		
+                    state.is_liftPIDOn = true;
+                    
+                    state.is_lockingClimb = false;
+                    
 					break;
 
 				case kUnlocking:
@@ -407,8 +437,8 @@ public class Robot extends TimedRobot {
 					break;
 
 				case kLiftDown:
-					// リフトを下げる
-                    state.liftSpeed = 0;
+					// コントロール操作にてリフトを下げる
+                    
 					break;
 				
 				default: 
@@ -420,8 +450,25 @@ public class Robot extends TimedRobot {
             // 初期化
             state.climbSequence = State.ClimbSequence.kDoNothing;
             compressor.start();
-		}
+        }
 
+        if(driver.getStartButton() && driver.getBackButton()) {
+            if(!state.is_startCounting) {
+                backTimer.reset();
+                backTimer.start();
+                state.is_startCounting = true;
+            }
+            if(backTimer.get() < 0.1) {
+                state.driveStraightSpeed = -0.4;
+                backTimer.reset();
+                backTimer.start();
+                state.is_startCounting = false;
+            }
+        } else {
+            state.is_startCounting = false;
+        }
+        
+        
         /*
         　* Stateをapplyする
         　*/
@@ -435,6 +482,9 @@ public class Robot extends TimedRobot {
     public void robotPeriidic(){
         drive.printVariables();
         lift.printVariables();
-		state.printVariables();
+        state.printVariables();
+        
+        
+        SmartDashboard.putBoolean("cargo", state.is_cargoHold);
     }
 }
