@@ -9,7 +9,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Grabber {
 
@@ -29,20 +28,18 @@ public class Grabber {
     
 	public void applyState(State state) {
         
-        if (state.is_toRetractArm) {
+        if (state.is_toRetractArm || state.is_holdingCargo) {
             // アームをしまう
-            retractArm();   
-            setRollerSpeed(Const.KeepHoldingCargoSpeed);
+            retractArm();  
         } else {
             // アームを出す
-            releaseArm();  
-            stopRoller();  
+            releaseArm();
         }
 
         
         switch (state.cargoState) {
             case kHold:
-                if(state.is_cargoHold){
+                if(state.is_holdingCargo){
                     setRollerSpeed(Const.KeepHoldingCargoSpeed);
                 } else {
                     holdCargo();
@@ -55,7 +52,7 @@ public class Grabber {
 
             case kDoNothing:
         
-                if(is_retractingArm() && state.is_cargoHold) {
+                if(is_retractingArm() && state.is_holdingCargo) {
                     setRollerSpeed(Const.KeepHoldingCargoSpeed);
                 }else {
                     stopRoller();
@@ -68,10 +65,10 @@ public class Grabber {
 
         if (state.is_toHoldPanel) {
             // パネルをつかむ
-           holdPanel();    
+           holdPanel();
         } else {
             // パネルを離す
-           releasePanel();    
+           releasePanel();
         }
 
         
@@ -102,7 +99,7 @@ public class Grabber {
     }
 
     private void holdPanel() {
-        barSolenoid.set(false);   
+        barSolenoid.set(false);
     }
 
     private void releasePanel() {

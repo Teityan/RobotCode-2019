@@ -7,9 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.cscore.CameraServerJNI;
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
@@ -123,7 +120,6 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         // Controller
-        //joystick = new Joystick(Const.JoystickPort);
         driver = new XboxController(Const.DriveControllerPort);
         operator = new XboxController(Const.OperateControllerPort);
 
@@ -262,6 +258,10 @@ public class Robot extends TimedRobot {
             // それ以外の場合は手動操作
             state.liftSpeed = deadbandProcessing(-operator.getY(Hand.kLeft));
             state.is_liftPIDOn = false;
+
+            if(lift.getHeight() > 30) {
+                state.is_lowInputOn = true;
+            }
         }
 
         /*********** Grabber ***********/
@@ -269,10 +269,12 @@ public class Robot extends TimedRobot {
          * Cargoを掴む部分
          * driverが操作する
          */
+
+        // T/Fが逆転している
         if(!cargoSensor.get()) {
-            state.is_cargoHold = true;
+            state.is_holdingCargo = true;
         } else {
-            state.is_cargoHold = false;
+            state.is_holdingCargo = false;
         }
 
         if (driver.getTriggerAxis(Hand.kRight) > Const.Deadband) {
@@ -329,6 +331,8 @@ public class Robot extends TimedRobot {
 			// スタートボタン + A or Yでクライムを始める
             state.is_autoClimbOn = true;
             state.is_lowInputOn = true;
+            state.is_toRetractArm = true;
+
             switch(state.climbSequence) {
 				case kDoNothing:
 				case kLiftUp:
@@ -485,6 +489,6 @@ public class Robot extends TimedRobot {
         state.printVariables();
         
         
-        SmartDashboard.putBoolean("cargo", state.is_cargoHold);
+        SmartDashboard.putBoolean("cargo", state.is_holdingCargo);
     }
 }

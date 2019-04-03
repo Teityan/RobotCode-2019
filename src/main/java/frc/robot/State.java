@@ -47,7 +47,7 @@ public class State {
     public CargoState cargoState;    // カーゴをどうするか  
     public boolean is_toHoldPanel;    // パネルを保持するかどうか
     public boolean is_toRetractArm;    //  アームをしまうかどうか
-    public boolean is_cargoHold;
+    public boolean is_holdingCargo;
 
     // Climb
     public ClimbSequence climbSequence = ClimbSequence.kDoNothing;    //    自動クライムの状態
@@ -81,7 +81,7 @@ public class State {
         cargoState = CargoState.kDoNothing;
         is_toHoldPanel = true;
         is_toRetractArm = false;
-        is_cargoHold = false;
+        is_holdingCargo = false;
    
         // Climb
         is_autoClimbOn = false;
